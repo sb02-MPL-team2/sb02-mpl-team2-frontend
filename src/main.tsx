@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {QueryCache, QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import './index.css'
 
@@ -87,8 +87,8 @@ const router = createBrowserRouter([
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,              // 데이터를 즉시 stale로 처리
-      cacheTime: 1000 * 60 * 5,  // 5분 후 캐시 삭제 (완전히 0으로 하면 성능 문제)
+      staleTime: 1000 * 60, // 예시: 1분
+      gcTime: 1000 * 60 * 5, // 5분 후 캐시 삭제 (완전히 0으로 하면 성능 문제)
       refetchOnMount: true,      // 컴포넌트 마운트 시마다 새로 요청
       refetchOnWindowFocus: true, // 윈도우 포커스 시마다 새로 요청
       refetchOnReconnect: true,  // 네트워크 재연결 시 새로 요청
