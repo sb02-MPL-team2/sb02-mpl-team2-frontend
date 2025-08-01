@@ -13,6 +13,9 @@ export interface ContentResponseDto {
   createdAt: string;
 }
 
+// Alias for convenience
+export type Content = ContentResponseDto;
+
 export interface ContentState {
   contents: ContentResponseDto[];
   selectedContent: ContentResponseDto | null;

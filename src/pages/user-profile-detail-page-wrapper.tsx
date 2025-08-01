@@ -1,14 +1,14 @@
 "use client"
 
 import { useParams } from 'react-router-dom'
-import ChatPage from './ChatPage'
+import UserProfileDetailPage from './user-profile-detail-page'
 
-export default function ChatPageWrapper() {
+export default function UserProfileDetailPageWrapper() {
   const { userId } = useParams<{ userId: string }>()
   
   if (!userId) {
     return <div>User ID not found</div>
   }
   
-  return <ChatPage userId={userId} />
+  return <UserProfileDetailPage userId={userId} />
 }

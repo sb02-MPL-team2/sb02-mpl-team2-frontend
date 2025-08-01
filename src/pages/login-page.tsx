@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle, AlertCircle } from "lucide-react"
 
 import { useAuthStore } from "@/stores/authStore"
-import SocialLoginButtons from "@/components/SocialLoginButtons"
+import SocialLoginButtons from "@/components/social-login-buttons"
 
 export default function LoginPage() {
   const navigate = useNavigate()

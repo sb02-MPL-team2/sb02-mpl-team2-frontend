@@ -21,7 +21,6 @@ export interface PlaylistDto {
 }
 
 export interface PlaylistCreateRequest {
-  userId: number;
   title: string;
   description: string;
 }

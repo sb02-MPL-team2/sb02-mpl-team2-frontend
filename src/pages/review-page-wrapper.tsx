@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from 'react-router-dom'
-import ReviewPage from './ReviewPage'
+import ReviewPage from './review-page'
 
 export default function ReviewPageWrapper() {
   const { contentId } = useParams<{ contentId: string }>()

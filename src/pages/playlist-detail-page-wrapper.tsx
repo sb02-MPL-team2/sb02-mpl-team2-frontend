@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from 'react-router-dom'
-import PlaylistDetailPage from './PlaylistDetailPage'
+import PlaylistDetailPage from './playlist-detail-page'
 
 export default function PlaylistDetailPageWrapper() {
   const { playlistId } = useParams<{ playlistId: string }>()

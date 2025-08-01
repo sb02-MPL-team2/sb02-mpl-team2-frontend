@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from 'react-router-dom'
-import WatchPage from './WatchPage'
+import WatchPage from './watch-page'
 
 export default function WatchPageWrapper() {
   const { contentId } = useParams<{ contentId: string }>()
