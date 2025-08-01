@@ -11,12 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 
 const mockAdminUsers = [
-  { id: "user1", name: "woody", email: "woody@playlist.io", isLocked: false, joinDate: "2025. 1. 1" },
-  { id: "user2", name: "buzz", email: "buzz@playlist.io", isLocked: false, joinDate: "2025. 1. 2" },
-  { id: "user3", name: "jessie", email: "jessie@playlist.io", isLocked: true, joinDate: "2025. 1. 3" },
-  { id: "user4", name: "rex", email: "rex@playlist.io", isLocked: false, joinDate: "2025. 1. 4" },
-  { id: "user5", name: "slinky", email: "slinky@playlist.io", isLocked: false, joinDate: "2025. 1. 5" },
-  { id: "user6", name: "potatohead", email: "potatohead@playlist.io", isLocked: false, joinDate: "2025. 1. 6" },
+  { id: "user1", name: "woody", email: "woody@playlist.io", isAdmin: false, isLocked: false, joinDate: "2025. 1. 1" },
+  { id: "user2", name: "buzz", email: "buzz@playlist.io", isAdmin: true, isLocked: false, joinDate: "2025. 1. 2" },
+  { id: "user3", name: "jessie", email: "jessie@playlist.io", isAdmin: false, isLocked: true, joinDate: "2025. 1. 3" },
+  { id: "user4", name: "rex", email: "rex@playlist.io", isAdmin: false, isLocked: false, joinDate: "2025. 1. 4" },
+  { id: "user5", name: "slinky", email: "slinky@playlist.io", isAdmin: true, isLocked: false, joinDate: "2025. 1. 5" },
+  { id: "user6", name: "potatohead", email: "potatohead@playlist.io", isAdmin: false, isLocked: false, joinDate: "2025. 1. 6" },
 ]
 
 export default function UserManagementPage() {
@@ -29,6 +29,14 @@ export default function UserManagementPage() {
     const user = users.find((u) => u.id === userId)
     if (user) {
       alert(`${user.name}님의 계정이 ${user.isLocked ? "잠금 해제" : "잠금"}되었습니다.`)
+    }
+  }
+
+  const handleToggleAdmin = (userId: string) => {
+    setUsers(users.map((user) => (user.id === userId ? { ...user, isAdmin: !user.isAdmin } : user)))
+    const user = users.find((u) => u.id === userId)
+    if (user) {
+      alert(`${user.name}님의 관리자 권한이 ${user.isAdmin ? "해제" : "부여"}되었습니다.`)
     }
   }
 
@@ -96,6 +104,7 @@ export default function UserManagementPage() {
               <TableRow>
                 <TableHead>이름</TableHead>
                 <TableHead>이메일</TableHead>
+                <TableHead>관리자 권한</TableHead>
                 <TableHead>계정 잠금 상태</TableHead>
                 <TableHead>가입일</TableHead>
                 <TableHead></TableHead>
@@ -107,19 +116,34 @@ export default function UserManagementPage() {
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
+                    <Badge variant={user.isAdmin ? "default" : "secondary"}>
+                      {user.isAdmin ? "관리자" : "일반 사용자"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <Badge variant={user.isLocked ? "destructive" : "secondary"}>
                       {user.isLocked ? "잠금됨" : "활성"}
                     </Badge>
                   </TableCell>
                   <TableCell>{user.joinDate}</TableCell>
                   <TableCell>
-                    <Button
-                      variant={user.isLocked ? "default" : "destructive"}
-                      size="sm"
-                      onClick={() => handleToggleLock(user.id)}
-                    >
-                      {user.isLocked ? "잠금 해제" : "계정 잠금"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={user.isAdmin ? "outline" : "default"}
+                        size="sm"
+                        onClick={() => handleToggleAdmin(user.id)}
+                        className={user.isAdmin ? "" : "bg-purple-600 hover:bg-purple-700"}
+                      >
+                        {user.isAdmin ? "관리자 권한 해제" : "관리자 권한 부여"}
+                      </Button>
+                      <Button
+                        variant={user.isLocked ? "default" : "destructive"}
+                        size="sm"
+                        onClick={() => handleToggleLock(user.id)}
+                      >
+                        {user.isLocked ? "잠금 해제" : "계정 잠금"}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

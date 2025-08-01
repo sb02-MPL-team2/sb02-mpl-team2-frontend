@@ -93,9 +93,11 @@ export default function WatchPage({ contentId }: WatchPageProps) {
                     <span className="text-gray-500">({contentDetail.reviewCount})</span>
                   </Link>
 
-                  <Button onClick={handleAddToPlaylist} className="bg-purple-600 hover:bg-purple-700">
-                    내 플레이리스트에 추가하기
-                  </Button>
+                  <div className="mt-2">
+                    <Button onClick={handleAddToPlaylist} className="bg-purple-600 hover:bg-purple-700">
+                      내 플레이리스트에 추가하기
+                    </Button>
+                  </div>
 
                   <p className="text-gray-600 text-sm leading-relaxed">{contentDetail.description}</p>
                 </div>
@@ -104,8 +106,8 @@ export default function WatchPage({ contentId }: WatchPageProps) {
           </Card>
 
           {/* Real-time Chat Section */}
-          <Card className="flex-1">
-            <CardContent className="p-6 h-full flex flex-col">
+          <Card className="flex-1" style={{ minHeight: '600px' }}>
+            <CardContent className="p-6 flex flex-col" style={{ height: '600px' }}>
               <h3 className="text-lg font-semibold mb-4">실시간 채팅</h3>
 
               {/* Chat Messages */}
