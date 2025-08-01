@@ -70,3 +70,6 @@ dist-ssr
 
 # Storybook build outputs
 storybook-static/
+
+# Test backend server
+test-backend/
