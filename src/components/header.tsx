@@ -1,6 +1,6 @@
 "use client"
 
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Menu, Bell, User, UserCog, LogOut } from "lucide-react"
 import { NotificationItem } from "./notification-item"
+import { useAuthStore } from "@/stores/authStore"
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -21,6 +22,13 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, notifications }: HeaderProps) {
   const notificationCount = notifications.length
+  const navigate = useNavigate()
+  const logout = useAuthStore((state) => state.logout)
+
+  const handleLogout = async () => {
+    await logout()
+    navigate("/login")
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-16">
@@ -79,11 +87,9 @@ export function Header({ onMenuClick, notifications }: HeaderProps) {
                   정보 변경
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/login" className="flex items-center gap-2 cursor-pointer">
-                  <LogOut className="h-4 w-4" />
-                  로그아웃
-                </Link>
+              <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer">
+                <LogOut className="h-4 w-4" />
+                로그아웃
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -1,10 +1,20 @@
 "use client"
 
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Bot, Home } from "lucide-react"
+import { useAuthStore } from "@/stores/authStore"
 
 export default function NotFoundPage() {
+  const navigate = useNavigate()
+  const { logout } = useAuthStore()
+
+  const handleGoToLogin = async () => {
+    // 현재 로그인 상태가 있다면 로그아웃 처리
+    await logout()
+    navigate("/login")
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="text-center space-y-8 max-w-md">
@@ -23,12 +33,13 @@ export default function NotFoundPage() {
 
         {/* Call to Action */}
         <div className="pt-4">
-          <Link to="/login">
-            <Button className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3">
-              <Home size={20} />
-              로그인으로 돌아가기
-            </Button>
-          </Link>
+          <Button 
+            onClick={handleGoToLogin}
+            className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3"
+          >
+            <Home size={20} />
+            로그인으로 돌아가기
+          </Button>
         </div>
       </div>
     </div>

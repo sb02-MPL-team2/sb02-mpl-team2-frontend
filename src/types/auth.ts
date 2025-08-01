@@ -18,6 +18,23 @@ export interface RefreshTokenResponse {
   token: string;
 }
 
+export interface SignupRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface SignupResponse {
+  id: number;
+  username: string;
+  email: string;
+  profileUrl: string;
+  role: 'ADMIN' | 'USER';
+  locked: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthState {
   token: string | null;
   refreshToken: string | null;

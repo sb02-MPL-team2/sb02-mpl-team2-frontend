@@ -2,25 +2,37 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { CheckCircle, AlertCircle } from "lucide-react"
 
 import { useAuthStore } from "@/stores/authStore"
 import SocialLoginButtons from "@/components/SocialLoginButtons"
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   
   const { login, isAuthenticated } = useAuthStore()
+
+  // 회원가입 완료 메시지 확인
+  useEffect(() => {
+    const message = location.state?.message
+    if (message) {
+      setSuccessMessage(message)
+    }
+  }, [location])
 
   // 이미 로그인된 사용자는 대시보드로 리다이렉트
   useEffect(() => {
@@ -59,10 +71,19 @@ export default function LoginPage() {
         <CardContent className="space-y-6">
           {/* Email and Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {successMessage && (
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  {successMessage}
+                </AlertDescription>
+              </Alert>
+            )}
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>

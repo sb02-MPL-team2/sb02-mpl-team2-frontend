@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { LoginRequest, LoginResponse, RefreshTokenResponse } from '@/types';
+import { LoginRequest, LoginResponse, RefreshTokenResponse, SignupRequest, SignupResponse } from '@/types';
 
 /**
  * 인증 관련 API 서비스
@@ -36,6 +36,24 @@ export const authService = {
    */
   logout: async (): Promise<void> => {
     await apiClient.post(API_ENDPOINTS.AUTH_LOGOUT);
+  },
+
+  /**
+   * 사용자 회원가입을 처리합니다
+   * @param data 회원가입 요청 데이터 (이름, 이메일, 비밀번호)
+   * @returns 생성된 사용자 정보
+   * @throws API 에러 시 예외 발생
+   */
+  signup: async (data: SignupRequest): Promise<SignupResponse> => {
+    const formData = new FormData();
+    formData.append('userCreateRequest', JSON.stringify(data));
+    
+    const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.USERS, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   },
 
   // 토큰 관리 메서드들이 제거됨

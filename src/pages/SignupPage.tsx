@@ -2,7 +2,8 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { authService } from "@/services/authService"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,17 +14,34 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
 export default function SignupPage() {
-  const [showError, setShowError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
+  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // 회원가입 로직이 여기에 추가될 예정
-    console.log("Signup form submitted")
+    setError("")
+    
+    if (!email || !username || !password) {
+      setError("모든 필드를 입력해주세요.")
+      return
+    }
 
-    // 예시: 에러 상태 테스트용 (실제 구현 시 제거)
-    // setErrorMessage("이미 존재하는 이메일입니다.")
-    // setShowError(true)
+    setIsLoading(true)
+    try {
+      await authService.signup({ email, username, password })
+      navigate("/login", { 
+        state: { message: "회원가입이 완료되었습니다. 로그인해주세요." } 
+      })
+    } catch (error: any) {
+      console.error("Signup failed:", error)
+      setError(error.response?.data?.message || "회원가입에 실패했습니다.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -35,31 +53,56 @@ export default function SignupPage() {
         <CardContent className="space-y-6">
           {/* Sign-up Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Error Alert - Hidden by default */}
-            {showError && (
+            {/* Error Alert */}
+            {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{errorMessage}</AlertDescription>
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
-              <Input id="email" type="email" placeholder="이메일을 입력하세요" required />
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="이메일을 입력하세요" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="name">이름</Label>
-              <Input id="name" type="text" placeholder="이름을 입력하세요" required />
+              <Input 
+                id="name" 
+                type="text" 
+                placeholder="이름을 입력하세요" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required 
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">비밀번호</Label>
-              <Input id="password" type="password" placeholder="비밀번호를 입력하세요" required />
+              <Input 
+                id="password" 
+                type="password" 
+                placeholder="비밀번호를 입력하세요" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+              />
             </div>
 
-            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-              가입하기
+            <Button 
+              type="submit" 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? "가입 중..." : "가입하기"}
             </Button>
           </form>
 
