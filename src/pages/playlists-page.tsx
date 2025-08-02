@@ -1,13 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { MainLayout } from "@/components/main-layout"
 import { PlaylistCard } from "@/components/playlist-card"
+import { CreatePlaylistDialog } from "@/components/create-playlist-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search } from "lucide-react"
+import { Search, Plus } from "lucide-react"
 import { playlistService } from "@/services/playlistService"
 import { useAuthStore } from "@/stores/authStore"
 import { QUERY_KEYS } from "@/lib/constants"
@@ -17,7 +19,9 @@ import { PlaylistDto } from "@/types"
 export default function PlaylistsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [subscriptionFilter, setSubscriptionFilter] = useState("all")
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { user } = useAuthStore()
+  const queryClient = useQueryClient()
 
   // 모든 공개 플레이리스트 조회 (기본)
   const { data: allPlaylists = [], isLoading: isLoadingAllPlaylists, error: allPlaylistsError } = useQuery({
@@ -52,13 +56,30 @@ export default function PlaylistsPage() {
   const isLoading = isLoadingAllPlaylists || isLoadingSubscribed
   const error = allPlaylistsError || subscribedError
 
+  const handlePlaylistCreated = (newPlaylist: PlaylistDto) => {
+    // 관련 쿼리 무효화하여 새로 생성된 플레이리스트가 목록에 나타나도록 함
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ALL_PLAYLISTS })
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER_PLAYLISTS(user?.id || 0) })
+    
+    alert(`새 플레이리스트 "${newPlaylist.title}"가 생성되었습니다!`)
+  }
+
   return (
     <MainLayout activeRoute="/playlists">
       <div className="space-y-6">
         {/* Page Title */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">플레이리스트</h1>
-          <p className="text-gray-600 mt-2">다양한 주제의 플레이리스트를 탐색해보세요.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">플레이리스트</h1>
+            <p className="text-gray-600 mt-2">다양한 주제의 플레이리스트를 탐색해보세요.</p>
+          </div>
+          <Button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            새 플레이리스트 만들기
+          </Button>
         </div>
 
         {/* Filters Section */}
@@ -144,6 +165,13 @@ export default function PlaylistsPage() {
           </div>
         )}
       </div>
+
+      {/* Create Playlist Dialog */}
+      <CreatePlaylistDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSuccess={handlePlaylistCreated}
+      />
     </MainLayout>
   )
 }
