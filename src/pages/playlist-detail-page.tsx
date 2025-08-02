@@ -2,9 +2,11 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Link } from "react-router-dom"
 import { MainLayout } from "@/components/main-layout"
 import { ContentCard } from "@/components/content-card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { X, User, Clipboard } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
@@ -108,7 +110,7 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
   }
 
   const handleRemoveContent = (itemId: number) => {
-    if (!isOwner) {
+    if (!isOwner && user?.id !== creator?.id) {
       alert('플레이리스트 소유자만 콘텐츠를 제거할 수 있습니다.')
       return
     }
@@ -237,29 +239,46 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
             </div>
           </div>
 
-          {/* Curator Info */}
-          <div className="flex items-center gap-3">
-            <span className="text-gray-700 font-medium">큐레이터</span>
-            <Avatar className="h-8 w-8">
-              <AvatarImage
-                src={creator?.profileUrl || "/placeholder.svg"}
-                alt={creator?.username || 'Unknown'}
-              />
-              <AvatarFallback className="bg-purple-100">
-                <User className="h-4 w-4 text-purple-600" />
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-gray-900 font-medium">{creator?.username || '로딩 중...'}</span>
-          </div>
+          {/* Curator Info and Description Card */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                {/* Curator Info */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-700 font-medium">큐레이터</span>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={creator?.profileUrl || "/placeholder.svg"}
+                        alt={creator?.username || 'Unknown'}
+                      />
+                      <AvatarFallback className="bg-purple-100">
+                        <User className="h-4 w-4 text-purple-600" />
+                      </AvatarFallback>
+                    </Avatar>
+                    {creator ? (
+                      <Link 
+                        to={`/profile/${creator.id}`}
+                        className="text-gray-900 font-medium hover:text-purple-600 hover:underline transition-colors cursor-pointer"
+                      >
+                        {creator.username}
+                      </Link>
+                    ) : (
+                      <span className="text-gray-900 font-medium">로딩 중...</span>
+                    )}
+                  </div>
+                  
+                  <div className="text-gray-600">구독자: {playlist.subscriberCount}명</div>
+                </div>
 
-          {/* Subscriber Count */}
-          <span className="text-gray-600">구독자: {playlist.subscriberCount}명</span>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <span className="text-gray-700 font-medium">설명</span>
-            <p className="text-gray-600 leading-relaxed">{playlist.description}</p>
-          </div>
+                {/* Description */}
+                <div className="space-y-3">
+                  <h3 className="text-gray-700 font-medium">설명</h3>
+                  <p className="text-gray-600 leading-relaxed">{playlist.description}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Bottom Section - Content List */}
@@ -271,8 +290,8 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
             {playlist.items.map((item) => (
               <div key={item.id} className="relative group">
                 {item.content && <ContentCard content={item.content} />}
-                {/* Remove Button - 소유자만 표시 */}
-                {isOwner && (
+                {/* Remove Button - 소유자이거나 큐레이터가 본인일 때만 표시 */}
+                {(isOwner || user?.id === creator?.id) && (
                   <Button
                     variant="ghost"
                     size="icon"
