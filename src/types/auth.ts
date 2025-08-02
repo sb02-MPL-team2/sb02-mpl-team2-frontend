@@ -47,6 +47,7 @@ export interface AuthState {
 export interface UserDto {
   id: number;
   username: string;
+  email: string;
   profileUrl: string;
   followerCount: number;
   followingCount: number;

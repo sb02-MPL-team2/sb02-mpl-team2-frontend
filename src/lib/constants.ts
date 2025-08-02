@@ -54,7 +54,9 @@ export const QUERY_KEYS = {
   
   // Users
   USERS: ['users'],
+  USER_ME: ['users', 'me'],
   USER: (userId: number) => ['users', userId],
+  USER_BY_ID: (userId: number) => ['users', userId],
   
   // Contents
   CONTENTS: ['contents'],

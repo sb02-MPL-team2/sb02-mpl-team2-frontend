@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { UserRoleBadge } from "@/components/user-role-badge"
 import { User, MessageCircle, Users, Heart } from "lucide-react"
 import { userService } from "@/services/userService"
 import { followService } from "@/services/followService"
@@ -146,7 +147,10 @@ export default function UserProfileDetailPage({ userId }: UserProfileDetailPageP
               {/* User Info */}
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{profileUser.username}</h1>
+                  <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                    <h1 className="text-3xl font-bold text-gray-900">{profileUser.username}</h1>
+                    {profileUser.role && <UserRoleBadge role={profileUser.role} />}
+                  </div>
                   <div className="flex items-center justify-center md:justify-start gap-4 mt-2">
                     <Badge variant="secondary" className="flex items-center gap-1">
                       <Users className="h-3 w-3" />

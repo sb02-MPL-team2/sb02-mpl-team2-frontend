@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { UserRoleBadge } from "@/components/user-role-badge"
 import { User } from "lucide-react"
 import { followService } from "@/services/followService"
 import { QUERY_KEYS } from "@/lib/constants"
@@ -19,6 +20,7 @@ interface UserProfileCardProps {
     username: string
     avatar: string
     followerCount: number
+    role?: 'ADMIN' | 'USER'
     isFollowing: boolean // Add isFollowing to props
   }
 }
@@ -83,7 +85,14 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
           </div>
 
           {/* Username */}
-          <h3 className="text-lg font-bold text-gray-900">{user.username}</h3>
+          <div className="space-y-2">
+            <h3 className="text-lg font-bold text-gray-900">{user.username}</h3>
+            {user.role && (
+              <div className="flex justify-center">
+                <UserRoleBadge role={user.role} />
+              </div>
+            )}
+          </div>
 
           {/* Follower Count */}
           <p className="text-sm text-gray-500">팔로워: {user.followerCount}명</p>

@@ -134,6 +134,7 @@ export default function ProfilesPage() {
                   username: user.username,
                   avatar: user.profileUrl,
                   followerCount: user.followerCount,
+                  role: user.role,
                   isFollowing: user.isFollowing
                 }} 
               />
