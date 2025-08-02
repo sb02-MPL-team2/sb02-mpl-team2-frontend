@@ -81,6 +81,9 @@ export const QUERY_KEYS = {
   FOLLOWERS: (userId: number) => ['follows', 'followers', userId],
   FOLLOWING: (userId: number) => ['follows', 'following', userId],
   FOLLOW_STATUS: (userId: number) => ['follows', 'status', userId],
+  
+  // Admin
+  ADMIN_USERS: ['admin', 'users'],
 } as const;
 
 // User Roles

@@ -3,20 +3,32 @@
 import { Link } from "react-router-dom"
 import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/stores/authStore"
+import { USER_ROLES } from "@/lib/constants"
 
 interface SidebarProps {
   isOpen: boolean
   activeRoute?: string
 }
 
-const navigationItems = [
+const baseNavigationItems = [
   { label: "콘텐츠 같이 보기", href: "/contents" },
   { label: "플레이리스트", href: "/playlists" },
   { label: "사용자 프로필", href: "/profiles" },
+]
+
+const adminNavigationItems = [
   { label: "사용자 관리", href: "/admin/users" },
 ]
 
 export function Sidebar({ isOpen, activeRoute }: SidebarProps) {
+  const { user } = useAuthStore()
+  const isAdmin = user?.role === USER_ROLES.ADMIN
+  
+  // 관리자인 경우에만 관리자 메뉴 추가
+  const navigationItems = isAdmin 
+    ? [...baseNavigationItems, ...adminNavigationItems]
+    : baseNavigationItems
   return (
     <>
       {/* Overlay for mobile */}

@@ -13,7 +13,7 @@ export const adminService = {
    * @throws 권한이 없거나 API 에러 시 예외 발생
    */
   getAllUsers: async (): Promise<UserDto[]> => {
-    const response = await apiClient.get<UserDto[]>(API_ENDPOINTS.ADMIN_USERS);
+    const response = await apiClient.get<UserDto[]>(API_ENDPOINTS.USERS);
     return response.data;
   },
 
