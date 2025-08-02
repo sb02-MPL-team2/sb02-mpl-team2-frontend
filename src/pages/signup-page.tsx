@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { authService } from "@/services/authService"
 
@@ -11,15 +11,35 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AlertCircle, User, Upload } from "lucide-react"
 
 export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setPreviewUrl(event.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleImageUpload = () => {
+    fileInputRef.current?.click()
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -32,7 +52,9 @@ export default function SignupPage() {
 
     setIsLoading(true)
     try {
-      await authService.signup({ email, username, password })
+      const signupData = { email, username, password }
+      await authService.signup(signupData, selectedFile || undefined)
+      
       navigate("/login", { 
         state: { message: "회원가입이 완료되었습니다. 로그인해주세요." } 
       })
@@ -60,6 +82,45 @@ export default function SignupPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
+            {/* Profile Image Section */}
+            <div className="space-y-2">
+              <Label>프로필 이미지 (선택사항)</Label>
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={previewUrl || "/placeholder.svg"} alt="프로필 미리보기" />
+                  <AvatarFallback className="bg-purple-100">
+                    <User className="h-10 w-10 text-purple-600" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Button 
+                    type="button"
+                    onClick={handleImageUpload}
+                    variant="outline"
+                    className="w-full flex items-center gap-2"
+                    disabled={isLoading}
+                  >
+                    <Upload className="h-4 w-4" />
+                    {selectedFile ? "다른 이미지 선택" : "이미지 선택"}
+                  </Button>
+                  {selectedFile ? (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✓ {selectedFile.name} 선택됨
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">JPG, PNG 파일을 업로드하세요.</p>
+                  )}
+                </div>
+              </div>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+                className="hidden" 
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>

@@ -41,12 +41,17 @@ export const authService = {
   /**
    * 사용자 회원가입을 처리합니다
    * @param data 회원가입 요청 데이터 (이름, 이메일, 비밀번호)
+   * @param profileImage 선택적 프로필 이미지 파일
    * @returns 생성된 사용자 정보
    * @throws API 에러 시 예외 발생
    */
-  signup: async (data: SignupRequest): Promise<SignupResponse> => {
+  signup: async (data: SignupRequest, profileImage?: File): Promise<SignupResponse> => {
     const formData = new FormData();
     formData.append('userCreateRequest', JSON.stringify(data));
+    
+    if (profileImage) {
+      formData.append('profile', profileImage);
+    }
     
     const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.USERS, formData, {
       headers: {
