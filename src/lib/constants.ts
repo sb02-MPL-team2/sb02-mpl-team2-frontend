@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
   PLAYLIST_ADD_CONTENT_LIST: '/playlist/add-list',
   PLAYLIST_SUBSCRIBE: (playlistId: number) => `/playlist/${playlistId}/subscribe`,
   PLAYLIST_SUBSCRIBED: '/playlist/subscribed',
+  PLAYLIST_SUBSCRIBED_BY_USER: (userId: number) => `/playlist/subscribed/user/${userId}`,
   
   // Reviews
   REVIEWS: '/reviews',
@@ -69,6 +70,7 @@ export const QUERY_KEYS = {
   PLAYLIST: (playlistId: number) => ['playlists', playlistId],
   USER_PLAYLISTS: (userId: number) => ['playlists', 'user', userId],
   SUBSCRIBED_PLAYLISTS: ['playlists', 'subscribed'],
+  USER_SUBSCRIBED_PLAYLISTS: (userId: number) => ['playlists', 'subscribed', 'user', userId],
   
   // Reviews
   REVIEWS: ['reviews'],

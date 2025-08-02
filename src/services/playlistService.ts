@@ -65,4 +65,10 @@ export const playlistService = {
     const response = await apiClient.get(API_ENDPOINTS.PLAYLIST_SUBSCRIBED);
     return response.data;
   },
+
+  // 특정 사용자가 구독한 플레이리스트 목록 (공개)
+  getSubscribedPlaylistsByUser: async (userId: number): Promise<PlaylistDto[]> => {
+    const response = await apiClient.get(API_ENDPOINTS.PLAYLIST_SUBSCRIBED_BY_USER(userId));
+    return response.data;
+  },
 };

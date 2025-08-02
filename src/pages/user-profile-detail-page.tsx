@@ -48,13 +48,12 @@ export default function UserProfileDetailPage({ userId }: UserProfileDetailPageP
   const userPlaylists = userPlaylistsResponse?.content || []
 
   // 해당 사용자가 구독한 플레이리스트 조회 (구독한 플레이리스트는 공개적으로 보이도록)
-  // TODO: 백엔드에 구독한 플레이리스트 조회 API 추가 필요
-  // const { data: subscribedPlaylists = [] } = useQuery({
-  //   queryKey: ['subscribed-playlists', userIdNumber],
-  //   queryFn: () => playlistService.getSubscribedPlaylistsByUser(userIdNumber),
-  //   enabled: !!userId && userIdNumber > 0,
-  //   retry: 1
-  // })
+  const { data: subscribedPlaylists = [], isLoading: isLoadingSubscribed } = useQuery({
+    queryKey: QUERY_KEYS.USER_SUBSCRIBED_PLAYLISTS(userIdNumber),
+    queryFn: () => playlistService.getSubscribedPlaylistsByUser(userIdNumber),
+    enabled: !!userId && userIdNumber > 0,
+    retry: 1
+  })
 
   // 현재 유저의 팔로잉 목록에서 이 사용자 팔로우 여부 확인
   const { data: followingUsers = [] } = useQuery({
@@ -226,17 +225,36 @@ export default function UserProfileDetailPage({ userId }: UserProfileDetailPageP
           )}
         </div>
 
-        {/* Subscribed Playlists - TODO: 백엔드 API 추가 후 구현 */}
-        {/* <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isOwnProfile ? "구독한" : `${profileUser.username}님이 구독한`} 플레이리스트
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subscribedPlaylists.map((playlist) => (
-              <PlaylistCard key={playlist.id} playlist={playlist} />
-            ))}
+        {/* Subscribed Playlists */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {isOwnProfile ? "구독한" : `${profileUser.username}님이 구독한`} 플레이리스트
+            </h2>
           </div>
-        </div> */}
+
+          {isLoadingSubscribed && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">구독한 플레이리스트를 불러오는 중...</p>
+            </div>
+          )}
+
+          {!isLoadingSubscribed && subscribedPlaylists.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">
+                {isOwnProfile ? "아직 구독한 플레이리스트가 없습니다." : "아직 구독한 플레이리스트가 없습니다."}
+              </p>
+            </div>
+          )}
+
+          {!isLoadingSubscribed && subscribedPlaylists.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {subscribedPlaylists.map((playlist) => (
+                <PlaylistCard key={playlist.id} playlist={playlist} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   )
