@@ -3,11 +3,15 @@
 import type React from "react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User } from "lucide-react"
+import { followService } from "@/services/followService"
+import { QUERY_KEYS } from "@/lib/constants"
+import { useAuthStore } from "@/stores/authStore"
 
 interface UserProfileCardProps {
   user: {
@@ -20,20 +24,49 @@ interface UserProfileCardProps {
 }
 
 export function UserProfileCard({ user }: UserProfileCardProps) {
-  // Use local state for demonstration, in a real app this would come from a global state or API
   const [isFollowingState, setIsFollowingState] = useState(user.isFollowing)
+  const queryClient = useQueryClient()
+  const { user: currentUser } = useAuthStore()
+
+  // 팔로우/언팔로우 mutation
+  const followMutation = useMutation({
+    mutationFn: (userId: number) => followService.followUser(userId),
+    onSuccess: () => {
+      setIsFollowingState(true)
+      // 팔로잉 목록과 사용자 목록 갱신
+      queryClient.invalidateQueries({ queryKey: ['following', currentUser?.id] })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS })
+    },
+    onError: () => {
+      alert('팔로우에 실패했습니다.')
+    }
+  })
+
+  const unfollowMutation = useMutation({
+    mutationFn: (userId: number) => followService.unfollowUser(userId),
+    onSuccess: () => {
+      setIsFollowingState(false)
+      // 팔로잉 목록과 사용자 목록 갱신
+      queryClient.invalidateQueries({ queryKey: ['following', currentUser?.id] })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS })
+    },
+    onError: () => {
+      alert('언팔로우에 실패했습니다.')
+    }
+  })
 
   const handleFollowClick = (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation when clicking the follow button
-    setIsFollowingState((prev) => !prev) // Toggle follow state
+    
+    const userId = parseInt(user.id)
     if (isFollowingState) {
-      console.log("Unfollowing user:", user.username)
-      alert(`${user.username}님을 언팔로우했습니다.`)
+      unfollowMutation.mutate(userId)
     } else {
-      console.log("Following user:", user.username)
-      alert(`${user.username}님을 팔로우했습니다!`)
+      followMutation.mutate(userId)
     }
   }
+
+  const isLoading = followMutation.isPending || unfollowMutation.isPending
 
   return (
     <Link to={`/profile/${user.id}`} className="block">
@@ -59,9 +92,10 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
           <Button
             onClick={handleFollowClick}
             className="w-full"
-            variant={isFollowingState ? "outline" : "default"} // Conditional variant
+            variant={isFollowingState ? "outline" : "default"}
+            disabled={isLoading}
           >
-            {isFollowingState ? "언팔로우" : "팔로우"} {/* Conditional text */}
+            {isLoading ? "처리 중..." : (isFollowingState ? "언팔로우" : "팔로우")}
           </Button>
         </CardContent>
       </Card>

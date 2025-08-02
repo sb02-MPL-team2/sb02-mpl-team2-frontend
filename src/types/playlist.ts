@@ -15,6 +15,7 @@ export interface PlaylistDto {
   title: string;
   description: string;
   subscriberCount: number;
+  trackCount?: number; // 트랙 수 (items.length 대신 서버에서 계산)
   createdAt: string;
   updatedAt: string;
   items: PlaylistItem[];

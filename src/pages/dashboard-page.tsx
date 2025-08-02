@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Search } from "lucide-react"
 import { contentService } from "@/services/contentService"
+import { QUERY_KEYS } from "@/lib/constants"
 import { Content } from "@/types"
 
 export default function DashboardPage() {
@@ -15,7 +16,7 @@ export default function DashboardPage() {
   const [filteredContents, setFilteredContents] = useState<Content[]>([])
 
   const { data: contents = [], isLoading, error } = useQuery({
-    queryKey: ['contents'],
+    queryKey: QUERY_KEYS.CONTENTS,
     queryFn: contentService.getContents
   })
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { playlistService } from "@/services/playlistService"
 import { useAuthStore } from "@/stores/authStore"
+import { QUERY_KEYS } from "@/lib/constants"
 import { Content } from "@/types"
 
 interface AddToPlaylistDialogProps {
@@ -24,7 +25,7 @@ export function AddToPlaylistDialog({ content, open, onOpenChange }: AddToPlayli
 
   // 사용자 플레이리스트 조회
   const { data: playlistData, isLoading: isLoadingPlaylists } = useQuery({
-    queryKey: ['user-playlists', user?.id],
+    queryKey: QUERY_KEYS.USER_PLAYLISTS(user?.id || 0),
     queryFn: () => user ? playlistService.getUserPlaylists(user.id) : Promise.resolve({ 
       content: [], size: 0, hasNext: false, nextCursor: null 
     }),

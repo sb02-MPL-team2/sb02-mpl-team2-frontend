@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { USER_ROLES } from '@/lib/constants'
 
 interface ProtectedRouteProps {
   /** 보호할 컴포넌트 */
@@ -32,7 +33,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
   // 관리자 권한이 필요한데 일반 사용자인 경우 404 페이지로 리다이렉트
   // 실제 프로덕션에서는 403 Forbidden 페이지를 별도로 만드는 것이 좋음
-  if (requireAdmin && user?.role !== 'ADMIN') {
+  if (requireAdmin && user?.role !== USER_ROLES.ADMIN) {
     return <Navigate to="/404" replace />
   }
 

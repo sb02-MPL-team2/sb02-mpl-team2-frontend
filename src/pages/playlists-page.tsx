@@ -1,96 +1,56 @@
 "use client"
 
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { MainLayout } from "@/components/main-layout"
 import { PlaylistCard } from "@/components/playlist-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" // Select components import
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search } from "lucide-react"
-import { useState } from "react" // useState import
+import { playlistService } from "@/services/playlistService"
+import { useAuthStore } from "@/stores/authStore"
+import { QUERY_KEYS } from "@/lib/constants"
+import { PlaylistDto } from "@/types"
 
-const mockPlaylists = [
-  {
-    id: "pl1",
-    title: "시간을 다룬 영화",
-    contentSummary: "인터스텔라, 인셉션, 테넷 등 13개의 콘텐츠",
-    lastUpdated: "2시간 전 업데이트 됨",
-    subscriberCount: "102명이 구독중",
-    isSubscribed: true, // Mock data update
-  },
-  {
-    id: "pl2",
-    title: "크리스토퍼 놀란 감독 특집",
-    contentSummary: "다크나이트, 프레스티지 등 8개의 콘텐츠",
-    lastUpdated: "5시간 전 업데이트 됨",
-    subscriberCount: "231명이 구독중",
-    isSubscribed: false, // Mock data update
-  },
-  {
-    id: "pl3",
-    title: "주말에 몰아볼만한 드라마",
-    contentSummary: "종이의 집, 기묘한 이야기 등 5개의 콘텐츠",
-    lastUpdated: "1일 전 업데이트 됨",
-    subscriberCount: "54명이 구독중",
-    isSubscribed: true, // Mock data update
-  },
-  {
-    id: "pl4",
-    title: "눈물 쏙 빼는 애니메이션",
-    contentSummary: "코코, 너의 이름은. 등 10개의 콘텐츠",
-    lastUpdated: "3일 전 업데이트 됨",
-    subscriberCount: "178명이 구독중",
-    isSubscribed: false, // Mock data update
-  },
-  {
-    id: "pl5",
-    title: "MCU 정주행 리스트",
-    contentSummary: "아이언맨, 캡틴 아메리카 등 23개의 콘텐츠",
-    lastUpdated: "1주 전 업데이트 됨",
-    subscriberCount: "305명이 구독중",
-    isSubscribed: true, // Mock data update
-  },
-  {
-    id: "pl6",
-    title: "한국 영화 명작 모음",
-    contentSummary: "기생충, 올드보이, 아가씨 등 15개의 콘텐츠",
-    lastUpdated: "3일 전 업데이트 됨",
-    subscriberCount: "89명이 구독중",
-    isSubscribed: false, // Mock data update
-  },
-  {
-    id: "pl7",
-    title: "스릴러 장르 베스트",
-    contentSummary: "조커, 샤이닝, 사이코 등 12개의 콘텐츠",
-    lastUpdated: "1주 전 업데이트 됨",
-    subscriberCount: "156명이 구독중",
-    isSubscribed: true, // Mock data update
-  },
-  {
-    id: "pl8",
-    title: "가족과 함께 보기 좋은 영화",
-    contentSummary: "토이 스토리, 겨울왕국 등 18개의 콘텐츠",
-    lastUpdated: "4일 전 업데이트 됨",
-    subscriberCount: "267명이 구독중",
-    isSubscribed: false, // Mock data update
-  },
-]
 
 export default function PlaylistsPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [subscriptionFilter, setSubscriptionFilter] = useState("all") // New state for subscription filter
+  const [subscriptionFilter, setSubscriptionFilter] = useState("all")
+  const { user } = useAuthStore()
 
-  const filteredPlaylists = mockPlaylists.filter((playlist) => {
+  // 모든 공개 플레이리스트 조회 (기본)
+  const { data: allPlaylists = [], isLoading: isLoadingAllPlaylists, error: allPlaylistsError } = useQuery({
+    queryKey: QUERY_KEYS.ALL_PLAYLISTS,
+    queryFn: playlistService.getAllPlaylists,
+    enabled: subscriptionFilter === "all" || subscriptionFilter === "unsubscribed"
+  })
+
+  // 구독한 플레이리스트 조회 (필터가 "구독한 플레이리스트"일 때만)
+  const { data: subscribedPlaylists = [], isLoading: isLoadingSubscribed, error: subscribedError } = useQuery({
+    queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS,
+    queryFn: playlistService.getSubscribedPlaylists,
+    enabled: !!user?.id && subscriptionFilter === "subscribed",
+    retry: 1
+  })
+
+  // 현재 표시할 플레이리스트 결정
+  const currentPlaylists = subscriptionFilter === "subscribed" ? subscribedPlaylists : allPlaylists
+  
+  // 직접 필터링 (검색어만 적용)
+  const filteredPlaylists = currentPlaylists.filter((playlist) => {
     const matchesSearch =
       playlist.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      playlist.contentSummary.toLowerCase().includes(searchQuery.toLowerCase())
+      playlist.description.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesSubscriptionFilter =
-      subscriptionFilter === "all" ||
-      (subscriptionFilter === "subscribed" && playlist.isSubscribed) ||
-      (subscriptionFilter === "unsubscribed" && !playlist.isSubscribed)
-
-    return matchesSearch && matchesSubscriptionFilter
+    // TODO: "구독 안 한 플레이리스트" 필터는 추후 구현 
+    // 현재는 전체 공개 플레이리스트를 보여줌
+    
+    return matchesSearch
   })
+
+  const isLoading = isLoadingAllPlaylists || isLoadingSubscribed
+  const error = allPlaylistsError || subscribedError
 
   return (
     <MainLayout activeRoute="/playlists">
@@ -140,17 +100,47 @@ export default function PlaylistsPage() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center min-h-64">
+            <div className="text-gray-500">플레이리스트를 불러오는 중...</div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center min-h-64">
+            <div className="text-red-500">플레이리스트를 불러오는데 실패했습니다.</div>
+          </div>
+        )}
+
         {/* Playlist Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredPlaylists.map((playlist) => (
-            <PlaylistCard key={playlist.id} playlist={playlist} />
-          ))}
-        </div>
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredPlaylists.map((playlist) => {
+              // 구독 상태는 현재 필터에 따라 결정
+              const isSubscribed = subscriptionFilter === "subscribed" ? true : false
+              return (
+                <PlaylistCard 
+                  key={playlist.id} 
+                  playlist={{
+                    ...playlist,
+                    isSubscribed
+                  }} 
+                />
+              )
+            })}
+          </div>
+        )}
 
         {/* Empty State */}
-        {filteredPlaylists.length === 0 && (
+        {!isLoading && !error && filteredPlaylists.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">검색 조건에 맞는 플레이리스트가 없습니다.</p>
+            <p className="text-gray-500">
+              {searchQuery || subscriptionFilter !== "all" 
+                ? "검색 조건에 맞는 플레이리스트가 없습니다." 
+                : "아직 생성된 플레이리스트가 없습니다."}
+            </p>
           </div>
         )}
       </div>

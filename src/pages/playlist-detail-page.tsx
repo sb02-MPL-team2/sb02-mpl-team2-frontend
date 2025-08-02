@@ -1,86 +1,22 @@
 "use client"
 
 import { useState } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { MainLayout } from "@/components/main-layout"
 import { ContentCard } from "@/components/content-card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { X, User, Clipboard } from "lucide-react" // Added Clipboard icon
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog" // Dialog components
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" // Select components
-import { Input } from "@/components/ui/input" // Input component
-import { Label } from "@/components/ui/label" // Label component
+import { X, User, Clipboard } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { playlistService } from "@/services/playlistService"
+import { userService } from "@/services/userService"
+import { followService } from "@/services/followService"
+import { useAuthStore } from "@/stores/authStore"
+import { QUERY_KEYS } from "@/lib/constants"
 
-// Mock Data
-const playlistDetails = {
-  id: "pl1",
-  title: "시간을 다룬 영화",
-  curator: { name: "woody", avatar: "/avatars/woody.png" },
-  subscriberCount: 102,
-  description: "시간 여행, 타임루프 등 시간을 흥미롭게 다룬 영화들을 모았습니다.",
-  contents: [
-    {
-      id: 1,
-      category: "영화",
-      title: "인터스텔라",
-      description: "인류의 새로운 보금자리를 찾아 떠나는...",
-      rating: 4.9,
-      reviewCount: "987",
-      viewerCount: "123",
-    },
-    {
-      id: 2,
-      category: "영화",
-      title: "테넷",
-      description: "시간의 흐름을 뒤집는 작전",
-      rating: 4.7,
-      reviewCount: "854",
-      viewerCount: "256",
-    },
-    {
-      id: 3,
-      category: "영화",
-      title: "인셉션",
-      description: "타인의 꿈에 들어가 생각을 훔치는...",
-      rating: 4.9,
-      reviewCount: "1.5k",
-      viewerCount: "312",
-    },
-    {
-      id: 4,
-      category: "영화",
-      title: "어바웃 타임",
-      description: "시간을 되돌릴 수 있는 능력을 가진 남자의 이야기",
-      rating: 4.8,
-      reviewCount: "1.2k",
-      viewerCount: "189",
-    },
-    {
-      id: 5,
-      category: "영화",
-      title: "그라운드호그 데이",
-      description: "같은 하루를 반복해서 살게 된 남자",
-      rating: 4.6,
-      reviewCount: "743",
-      viewerCount: "98",
-    },
-    {
-      id: 6,
-      category: "영화",
-      title: "루퍼",
-      description: "미래에서 온 자신을 죽여야 하는 킬러",
-      rating: 4.5,
-      reviewCount: "621",
-      viewerCount: "145",
-    },
-  ],
-}
-
-// Mock data for followers
-const mockMyFollowers = [
-  { id: "user2", name: "buzz" },
-  { id: "user3", name: "jessie" },
-]
 
 interface PlaylistDetailPageProps {
   playlistId: string
@@ -89,22 +25,105 @@ interface PlaylistDetailPageProps {
 export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPageProps) {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
   const [selectedFollowerId, setSelectedFollowerId] = useState<string | null>(null)
+  const { user } = useAuthStore()
+  const queryClient = useQueryClient()
+
+  // 플레이리스트 상세 정보 조회
+  const { data: playlist, isLoading: isLoadingPlaylist, error: playlistError } = useQuery({
+    queryKey: QUERY_KEYS.PLAYLIST(parseInt(playlistId)),
+    queryFn: () => playlistService.getPlaylistById(parseInt(playlistId))
+  })
+
+  // 구독한 플레이리스트 목록 조회 (구독 상태 확인용)
+  const { data: subscribedPlaylists = [] } = useQuery({
+    queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS,
+    queryFn: playlistService.getSubscribedPlaylists,
+    enabled: !!user?.id
+  })
+
+  // 플레이리스트 생성자 정보 조회
+  const { data: creator } = useQuery({
+    queryKey: QUERY_KEYS.USER(playlist?.userId || 0),
+    queryFn: () => playlist ? userService.getUserById(playlist.userId) : Promise.resolve(null),
+    enabled: !!playlist?.userId
+  })
+
+  // 내 팔로워 목록 조회 (공유용)
+  const { data: myFollowers = [] } = useQuery({
+    queryKey: QUERY_KEYS.FOLLOWERS(user?.id || 0),
+    queryFn: () => user ? followService.getFollowers(user.id) : Promise.resolve([]),
+    enabled: !!user?.id && isShareDialogOpen // 공유 다이얼로그가 열릴 때만 조회
+  })
+
+  // 플레이리스트 구독/구독해제 mutation
+  const subscribeMutation = useMutation({
+    mutationFn: playlistService.subscribePlaylist,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS })
+      alert('플레이리스트를 구독했습니다!')
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || '구독에 실패했습니다.')
+    }
+  })
+
+  const unsubscribeMutation = useMutation({
+    mutationFn: playlistService.unsubscribePlaylist,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS })
+      alert('플레이리스트 구독을 해제했습니다!')
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || '구독 해제에 실패했습니다.')
+    }
+  })
+
+  // 콘텐츠 제거 mutation
+  const removeContentMutation = useMutation({
+    mutationFn: ({ playlistId, itemId }: { playlistId: number, itemId: number }) => 
+      playlistService.removeContentFromPlaylist(playlistId, itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYLIST(parseInt(playlistId)) })
+      alert('콘텐츠가 플레이리스트에서 제거되었습니다.')
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.message || '콘텐츠 제거에 실패했습니다.')
+    }
+  })
+
+  const isSubscribed = subscribedPlaylists.some(sp => sp.id === parseInt(playlistId))
+  const isOwner = user?.id === playlist?.userId
 
   const handleSubscribe = () => {
-    console.log("Subscribing to playlist:", playlistDetails.title)
-    alert("플레이리스트를 구독했습니다!")
+    if (!user) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+    
+    if (isSubscribed) {
+      unsubscribeMutation.mutate(parseInt(playlistId))
+    } else {
+      subscribeMutation.mutate(parseInt(playlistId))
+    }
   }
 
-  const handleRemoveContent = (contentId: number) => {
-    console.log("Removing content from playlist:", contentId)
-    alert(`콘텐츠가 플레이리스트에서 제거되었습니다.`)
+  const handleRemoveContent = (itemId: number) => {
+    if (!isOwner) {
+      alert('플레이리스트 소유자만 콘텐츠를 제거할 수 있습니다.')
+      return
+    }
+    
+    removeContentMutation.mutate({ 
+      playlistId: parseInt(playlistId), 
+      itemId 
+    })
   }
 
   const handleShareToFollower = () => {
     if (selectedFollowerId) {
-      const follower = mockMyFollowers.find((f) => f.id === selectedFollowerId)
-      console.log(`Sharing playlist to follower: ${follower?.name} (ID: ${selectedFollowerId})`)
-      alert(`${follower?.name}님에게 플레이리스트를 공유했습니다!`)
+      const follower = myFollowers.find((f) => f.id.toString() === selectedFollowerId)
+      console.log(`Sharing playlist to follower: ${follower?.username} (ID: ${selectedFollowerId})`)
+      alert(`${follower?.username}님에게 플레이리스트를 공유했습니다!`)
       setIsShareDialogOpen(false)
       setSelectedFollowerId(null)
     } else {
@@ -121,6 +140,28 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
   // Construct the share link dynamically
   const playlistShareLink = typeof window !== "undefined" ? `${window.location.origin}/playlist/${playlistId}` : ""
 
+  // 로딩 상태
+  if (isLoadingPlaylist) {
+    return (
+      <MainLayout activeRoute="/playlists">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-gray-500">플레이리스트 정보를 불러오는 중...</div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  // 에러 상태
+  if (playlistError || !playlist) {
+    return (
+      <MainLayout activeRoute="/playlists">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-red-500">플레이리스트를 찾을 수 없습니다.</div>
+        </div>
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout activeRoute="/playlists">
       <div className="space-y-8 max-w-6xl mx-auto">
@@ -128,13 +169,20 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
         <div className="space-y-6">
           {/* Title and Action Buttons */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-4xl font-bold text-gray-900">{playlistDetails.title}</h1>
+            <h1 className="text-4xl font-bold text-gray-900">{playlist.title}</h1>
             <div className="flex items-center gap-3">
-              {" "}
-              {/* Group for action buttons */}
-              <Button onClick={handleSubscribe} className="bg-purple-600 hover:bg-purple-700">
-                구독하기
-              </Button>
+              {/* 구독 버튼 - 소유자는 비표시 */}
+              {!isOwner && (
+                <Button 
+                  onClick={handleSubscribe} 
+                  disabled={subscribeMutation.isPending || unsubscribeMutation.isPending}
+                  className={isSubscribed ? "bg-gray-600 hover:bg-gray-700" : "bg-purple-600 hover:bg-purple-700"}
+                >
+                  {subscribeMutation.isPending || unsubscribeMutation.isPending 
+                    ? "처리 중..." 
+                    : isSubscribed ? "구독 해제" : "구독하기"}
+                </Button>
+              )}
               <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-purple-600 hover:bg-purple-700">공유하기</Button>
@@ -153,10 +201,10 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
                             <SelectValue placeholder="팔로워를 선택하세요..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {mockMyFollowers.length > 0 ? (
-                              mockMyFollowers.map((follower) => (
-                                <SelectItem key={follower.id} value={follower.id}>
-                                  {follower.name}
+                            {myFollowers.length > 0 ? (
+                              myFollowers.map((follower) => (
+                                <SelectItem key={follower.id} value={follower.id.toString()}>
+                                  {follower.username}
                                 </SelectItem>
                               ))
                             ) : (
@@ -194,23 +242,23 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
             <span className="text-gray-700 font-medium">큐레이터</span>
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={playlistDetails.curator.avatar || "/placeholder.svg"}
-                alt={playlistDetails.curator.name}
+                src={creator?.profileUrl || "/placeholder.svg"}
+                alt={creator?.username || 'Unknown'}
               />
               <AvatarFallback className="bg-purple-100">
                 <User className="h-4 w-4 text-purple-600" />
               </AvatarFallback>
             </Avatar>
-            <span className="text-gray-900 font-medium">{playlistDetails.curator.name}</span>
+            <span className="text-gray-900 font-medium">{creator?.username || '로딩 중...'}</span>
           </div>
 
           {/* Subscriber Count */}
-          <span className="text-gray-600">구독자: {playlistDetails.subscriberCount}명</span>
+          <span className="text-gray-600">구독자: {playlist.subscriberCount}명</span>
 
           {/* Description */}
           <div className="space-y-2">
             <span className="text-gray-700 font-medium">설명</span>
-            <p className="text-gray-600 leading-relaxed">{playlistDetails.description}</p>
+            <p className="text-gray-600 leading-relaxed">{playlist.description}</p>
           </div>
         </div>
 
@@ -220,27 +268,30 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
 
           {/* Content Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {playlistDetails.contents.map((content) => (
-              <div key={content.id} className="relative group">
-                <ContentCard content={content} />
-                {/* Remove Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 bg-white/80 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  onClick={(e) => {
-                    e.preventDefault() // Prevent navigation when clicking the X button
-                    handleRemoveContent(content.id)
-                  }}
-                >
-                  <X className="h-4 w-4 text-gray-600" />
-                </Button>
+            {playlist.items.map((item) => (
+              <div key={item.id} className="relative group">
+                {item.content && <ContentCard content={item.content} />}
+                {/* Remove Button - 소유자만 표시 */}
+                {isOwner && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 bg-white/80 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    onClick={(e) => {
+                      e.preventDefault() // Prevent navigation when clicking the X button
+                      handleRemoveContent(item.id)
+                    }}
+                    disabled={removeContentMutation.isPending}
+                  >
+                    <X className="h-4 w-4 text-gray-600" />
+                  </Button>
+                )}
               </div>
             ))}
           </div>
 
           {/* Empty State (when no contents) */}
-          {playlistDetails.contents.length === 0 && (
+          {playlist.items.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">이 플레이리스트에는 아직 콘텐츠가 없습니다.</p>
             </div>

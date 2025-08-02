@@ -8,6 +8,7 @@ import { ContentDetailSection } from "@/components/content-detail-section"
 import { ChatSection } from "@/components/chat-section"
 import { ViewerListSection } from "@/components/viewer-list-section"
 import { contentService } from "@/services/contentService"
+import { QUERY_KEYS } from "@/lib/constants"
 
 interface WatchPageProps {
   contentId: string
@@ -16,7 +17,7 @@ interface WatchPageProps {
 export default function WatchPage({ contentId }: WatchPageProps) {
   // 콘텐츠 상세 정보 조회
   const { data: content, isLoading, error } = useQuery({
-    queryKey: ['content', contentId],
+    queryKey: QUERY_KEYS.CONTENT(parseInt(contentId)),
     queryFn: () => contentService.getContentById(parseInt(contentId))
   })
 

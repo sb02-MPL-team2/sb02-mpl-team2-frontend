@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
   FOLLOWING: (userId: number) => `/follows/following/${userId}`,
   
   // Admin
+  ADMIN_USERS: '/admin/users',
   ADMIN_LOCK_USER: (userId: number) => `/admin/users/${userId}/lock`,
   ADMIN_UNLOCK_USER: (userId: number) => `/admin/users/${userId}/unlock`,
   ADMIN_UPDATE_ROLE: (userId: number) => `/admin/users/${userId}/role`,
@@ -62,6 +63,7 @@ export const QUERY_KEYS = {
   
   // Playlists
   PLAYLISTS: ['playlists'],
+  ALL_PLAYLISTS: ['playlists', 'all'],
   PLAYLIST: (playlistId: number) => ['playlists', playlistId],
   USER_PLAYLISTS: (userId: number) => ['playlists', 'user', userId],
   SUBSCRIBED_PLAYLISTS: ['playlists', 'subscribed'],

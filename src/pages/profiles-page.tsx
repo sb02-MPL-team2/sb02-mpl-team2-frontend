@@ -6,28 +6,52 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search } from "lucide-react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { userService } from "@/services/userService"
+import { followService } from "@/services/followService"
+import { useAuthStore } from "@/stores/authStore"
+import { QUERY_KEYS } from "@/lib/constants"
+import { UserDto } from "@/types"
 
-const mockUsers = [
-  { id: "user1", username: "woody", avatar: "/avatars/woody.png", followerCount: 152, isFollowing: true },
-  { id: "user2", username: "buzz", avatar: "/avatars/buzz.png", followerCount: 98, isFollowing: false },
-  { id: "user3", username: "jessie", avatar: "/avatars/jessie.png", followerCount: 210, isFollowing: false },
-  { id: "user4", username: "rex", avatar: "/avatars/rex.png", followerCount: 50, isFollowing: true },
-  { id: "user5", username: "slinky", avatar: "/avatars/slinky.png", followerCount: 87, isFollowing: false },
-  { id: "user6", username: "hamm", avatar: "/avatars/hamm.png", followerCount: 134, isFollowing: true },
-  { id: "user7", username: "potato", avatar: "/avatars/potato.png", followerCount: 76, isFollowing: false },
-  { id: "user8", username: "bullseye", avatar: "/avatars/bullseye.png", followerCount: 189, isFollowing: true },
-  { id: "user9", username: "molly", avatar: "/avatars/molly.png", followerCount: 245, isFollowing: false },
-  { id: "user10", username: "andy", avatar: "/avatars/andy.png", followerCount: 312, isFollowing: true },
-  { id: "user11", username: "bonnie", avatar: "/avatars/bonnie.png", followerCount: 167, isFollowing: false },
-  { id: "user12", username: "lotso", avatar: "/avatars/lotso.png", followerCount: 43, isFollowing: true },
-]
+// 사용자 + 팔로우 상태 정보를 합친 타입
+interface UserWithFollowStatus extends UserDto {
+  isFollowing: boolean;
+}
 
 export default function ProfilesPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [followFilter, setFollowFilter] = useState("all") // New state for follow filter
+  const [followFilter, setFollowFilter] = useState("all")
+  const { user: currentUser } = useAuthStore()
 
-  const filteredUsers = mockUsers.filter((user) => {
+  // 모든 사용자 조회
+  const { data: users = [], isLoading, error } = useQuery({
+    queryKey: QUERY_KEYS.USERS,
+    queryFn: userService.getUsers,
+    retry: 1
+  })
+
+  // 현재 유저가 팔로우하는 사용자들의 ID 목록 조회
+  const { data: followingUsers = [] } = useQuery({
+    queryKey: ['following', currentUser?.id],
+    queryFn: () => currentUser ? followService.getFollowing(currentUser.id) : Promise.resolve([]),
+    enabled: !!currentUser?.id,
+    retry: 1
+  })
+
+  // 사용자 목록에 팔로우 상태 정보 추가
+  const usersWithFollowStatus: UserWithFollowStatus[] = useMemo(() => {
+    const followingIds = new Set(followingUsers.map(user => user.id))
+    return users
+      .filter(user => user.id !== currentUser?.id) // 자기 자신 제외
+      .map(user => ({
+        ...user,
+        isFollowing: followingIds.has(user.id)
+      }))
+  }, [users, followingUsers, currentUser?.id])
+
+  // 필터링된 사용자 목록
+  const filteredUsers = usersWithFollowStatus.filter((user) => {
     const matchesSearch = user.username.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesFollowFilter =
@@ -85,15 +109,40 @@ export default function ProfilesPage() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">사용자 목록을 불러오는 중...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-500">사용자 목록을 불러오는데 실패했습니다.</p>
+          </div>
+        )}
+
         {/* User Profile Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredUsers.map((user) => (
-            <UserProfileCard key={user.id} user={user} />
-          ))}
-        </div>
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredUsers.map((user) => (
+              <UserProfileCard 
+                key={user.id} 
+                user={{
+                  id: user.id.toString(),
+                  username: user.username,
+                  avatar: user.profileUrl,
+                  followerCount: user.followerCount,
+                  isFollowing: user.isFollowing
+                }} 
+              />
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
-        {filteredUsers.length === 0 && (
+        {!isLoading && !error && filteredUsers.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">검색 결과가 없습니다.</p>
           </div>
