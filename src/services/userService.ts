@@ -21,21 +21,6 @@ export const userService = {
     return response.data;
   },
 
-  // 회원가입
-  createUser: async (data: UserCreateRequest, profileFile?: File): Promise<UserDto> => {
-    const formData = new FormData();
-    formData.append('userCreateRequest', JSON.stringify(data));
-    if (profileFile) {
-      formData.append('profile', profileFile);
-    }
-
-    const response = await apiClient.post<UserDto>(API_ENDPOINTS.USERS, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
 
   // 사용자 정보 수정
   updateUser: async (userId: number, data: UserUpdateRequest, profileFile?: File): Promise<UserDto> => {

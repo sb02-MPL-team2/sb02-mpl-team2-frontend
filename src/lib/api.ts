@@ -31,6 +31,11 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
+    // FormData인 경우 Content-Type을 제거하여 브라우저가 자동으로 설정하도록 함
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    
     // 쿠키 전송을 위한 withCredentials 설정
     config.withCredentials = true;
     

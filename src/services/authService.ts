@@ -47,17 +47,15 @@ export const authService = {
    */
   signup: async (data: SignupRequest, profileImage?: File): Promise<SignupResponse> => {
     const formData = new FormData();
-    formData.append('userCreateRequest', JSON.stringify(data));
+    
+    // Spring Boot의 @RequestPart를 위한 JSON Blob 생성
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    formData.append('userCreateRequest', blob);
     
     if (profileImage) {
       formData.append('profile', profileImage);
     }
-    
-    const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.USERS, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.USERS, formData);
     return response.data;
   },
 
