@@ -1,5 +1,5 @@
 // API Constants
-export const API_BASE_URL = 'http://localhost:8000/api';
+export const API_BASE_URL = 'http://localhost:8080/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -7,6 +7,9 @@ export const API_ENDPOINTS = {
   AUTH_LOGIN: '/auth/login',
   AUTH_REFRESH: '/auth/refresh', 
   AUTH_LOGOUT: '/auth/logout',
+  
+  // Auth
+  AUTH_SIGNUP: '/auth/signup',
   
   // Users
   USERS: '/users',

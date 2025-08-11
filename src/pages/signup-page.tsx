@@ -59,8 +59,13 @@ export default function SignupPage() {
         state: { message: "회원가입이 완료되었습니다. 로그인해주세요." } 
       })
     } catch (error: any) {
-      console.error("Signup failed:", error)
-      setError(error.response?.data?.message || "회원가입에 실패했습니다.")
+      // 유효성 검사 에러 처리
+      if (error.response?.status === 400) {
+        const errorMessage = error.response?.data?.message || "입력 정보를 확인해주세요."
+        setError(errorMessage)
+      } else {
+        setError(error.response?.data?.message || "회원가입에 실패했습니다.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -156,6 +161,9 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required 
               />
+              <p className="text-xs text-gray-500">
+                최소 8자 이상, 숫자/문자/특수문자(!@#$%^&*) 포함
+              </p>
             </div>
 
             <Button 

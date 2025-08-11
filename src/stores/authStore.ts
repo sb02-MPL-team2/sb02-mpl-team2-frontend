@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { AuthState, UserDto } from '@/types';
 import { authService } from '@/services/authService';
+import { userService } from '@/services/userService';
 import { tokenManager } from '@/lib/tokenManager';
 
 interface AuthStore extends AuthState {
@@ -33,13 +34,19 @@ export const useAuthStore = create<AuthStore>((set, get) => {
         set({ isLoading: true });
         try {
           const response = await authService.login({ email, password });
-          const { token, user } = response; // refreshToken은 쿠키로 관리되므로 제거
+          const { token } = response; // 백엔드에서 토큰만 반환
 
+          // 토큰 설정 후 사용자 정보 가져오기
           set({
             token, // 메모리에만 저장
             refreshToken: null, // 쿠키로 관리되므로 사용하지 않음
-            user,
             isAuthenticated: true,
+          });
+
+          // 사용자 정보 가져오기
+          const user = await userService.getMe();
+          set({
+            user,
             isLoading: false,
           });
         } catch (error) {

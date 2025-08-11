@@ -38,8 +38,13 @@ export const userService = {
     return response.data;
   },
 
-  // 회원 탈퇴
+  // 회원 탈퇴 (내 계정 삭제)
   deleteMyAccount: async (): Promise<void> => {
     await apiClient.delete(API_ENDPOINTS.USERS_ME);
+  },
+
+  // 특정 사용자 삭제 (관리자용)
+  deleteUser: async (userId: number): Promise<void> => {
+    await apiClient.delete(API_ENDPOINTS.USER_BY_ID(userId));
   },
 };

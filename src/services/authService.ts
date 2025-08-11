@@ -10,12 +10,13 @@ export const authService = {
   /**
    * 사용자 로그인을 처리합니다
    * @param data 로그인 요청 데이터 (이메일, 비밀번호)
-   * @returns 로그인 응답 (토큰, 리프레시 토큰, 사용자 정보)
+   * @returns 로그인 응답 (토큰만 반환 - 백엔드 미완성으로 임시 처리)
    * @throws API 에러 시 예외 발생
+   * TODO: 백엔드에서 refreshToken, user 정보 추가 후 LoginResponse 타입 복원
    */
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH_LOGIN, data);
-    return response.data;
+    const response = await apiClient.post<string>(API_ENDPOINTS.AUTH_LOGIN, data);
+    return { token: response.data };
   },
 
   /**
@@ -25,8 +26,8 @@ export const authService = {
    * @throws 리프레시 토큰이 만료되었거나 유효하지 않을 때 예외 발생
    */
   refresh: async (): Promise<RefreshTokenResponse> => {
-    const response = await apiClient.post<RefreshTokenResponse>(API_ENDPOINTS.AUTH_REFRESH, {});
-    return response.data;
+    const response = await apiClient.post<string>(API_ENDPOINTS.AUTH_REFRESH, {});
+    return { token: response.data };
   },
 
   /**
@@ -55,7 +56,7 @@ export const authService = {
     if (profileImage) {
       formData.append('profile', profileImage);
     }
-    const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.USERS, formData);
+    const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.AUTH_SIGNUP, formData);
     return response.data;
   },
 

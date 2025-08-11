@@ -6,8 +6,6 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  refreshToken: string;
-  user: UserDto;
 }
 
 export interface RefreshTokenRequest {
@@ -30,9 +28,10 @@ export interface SignupResponse {
   email: string;
   profileUrl: string;
   role: 'ADMIN' | 'USER';
-  locked: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isLocked: boolean;
+  isDeleted: boolean;
+  followerCount: number;
+  followingCount: number;
 }
 
 export interface AuthState {
@@ -52,9 +51,10 @@ export interface UserDto {
   followerCount: number;
   followingCount: number;
   role: 'ADMIN' | 'USER';
-  locked: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isLocked: boolean;
+  isDeleted: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface UserSlimDto {

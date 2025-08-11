@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Shield, ShieldCheck, Lock, Unlock, Loader2 } from "lucide-react"
+import { Search, Shield, ShieldCheck, Lock, Unlock, Loader2, Trash2 } from "lucide-react"
 import { UserRoleBadge } from "@/components/user-role-badge"
 import { adminService } from "@/services/adminService"
 import { useAuthStore } from "@/stores/authStore"
@@ -24,7 +24,7 @@ export default function UserManagementPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean
-    type: 'role' | 'lock' | null
+    type: 'role' | 'lock' | 'delete' | null
     userId: number | null
     userName: string
     action: string
@@ -89,6 +89,19 @@ export default function UserManagementPage() {
     }
   })
 
+  // 사용자 삭제 mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: adminService.deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS })
+      setConfirmDialog({ isOpen: false, type: null, userId: null, userName: "", action: "" })
+    },
+    onError: (error) => {
+      console.error('사용자 삭제 실패:', error)
+      alert('사용자 삭제에 실패했습니다. 다시 시도해주세요.')
+    }
+  })
+
   // 필터링된 사용자 목록
   const filteredUsers = users.filter((user: UserDto) => {
     // 검색어 필터
@@ -145,6 +158,22 @@ export default function UserManagementPage() {
     })
   }
 
+  // 사용자 삭제 핸들러
+  const handleDeleteUser = (user: UserDto) => {
+    if (user.id === currentUser?.id) {
+      alert('자신의 계정은 삭제할 수 없습니다.')
+      return
+    }
+
+    setConfirmDialog({
+      isOpen: true,
+      type: 'delete',
+      userId: user.id,
+      userName: user.username,
+      action: '사용자 삭제'
+    })
+  }
+
   // 확인 다이얼로그 실행
   const handleConfirmAction = () => {
     if (!confirmDialog.userId || !confirmDialog.type) return
@@ -164,12 +193,15 @@ export default function UserManagementPage() {
           lockUserMutation.mutate(confirmDialog.userId)
         }
       }
+    } else if (confirmDialog.type === 'delete') {
+      deleteUserMutation.mutate(confirmDialog.userId)
     }
   }
 
   const isActionLoading = updateRoleMutation.isPending || 
                          lockUserMutation.isPending || 
-                         unlockUserMutation.isPending
+                         unlockUserMutation.isPending ||
+                         deleteUserMutation.isPending
 
   if (isLoading) {
     return (
@@ -328,6 +360,18 @@ export default function UserManagementPage() {
                                 계정 잠금
                               </>
                             )}
+                          </Button>
+
+                          {/* 삭제 버튼 */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user)}
+                            disabled={user.id === currentUser?.id || isActionLoading}
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            삭제
                           </Button>
                         </div>
                       </TableCell>

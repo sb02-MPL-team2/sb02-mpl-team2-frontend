@@ -46,4 +46,13 @@ export const adminService = {
     const response = await apiClient.put<UserDto>(API_ENDPOINTS.ADMIN_UPDATE_ROLE(userId), { role });
     return response.data;
   },
+
+  /**
+   * 사용자 삭제 (관리자 전용)
+   * @param userId 삭제할 사용자 ID
+   * @throws 권한이 없거나 API 에러 시 예외 발생
+   */
+  deleteUser: async (userId: number): Promise<void> => {
+    await apiClient.delete(API_ENDPOINTS.USER_BY_ID(userId));
+  },
 };

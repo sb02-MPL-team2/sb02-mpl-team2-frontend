@@ -24,11 +24,16 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config) => {
-    // tokenManager에서 토큰 가져오기
-    const token = tokenManager.getToken();
+    // 인증이 필요 없는 엔드포인트는 토큰을 첨부하지 않음
+    const isAuthEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/signup');
     
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (!isAuthEndpoint) {
+      // tokenManager에서 토큰 가져오기
+      const token = tokenManager.getToken();
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     
     // FormData인 경우 Content-Type을 제거하여 브라우저가 자동으로 설정하도록 함
@@ -61,31 +66,24 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 로그인 요청인 경우 토큰 갱신 시도하지 않음
-    if (originalRequest.url?.includes('/auth/login')) {
+    // 인증 관련 요청인 경우 토큰 갱신 시도하지 않음
+    if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/signup')) {
       return Promise.reject(error);
     }
 
-    // 401 에러이고 재시도가 아닌 경우 토큰 갱신 시도
+    // 401 에러 시 토큰 갱신 시도
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       try {
-        // 쿠키에서 자동으로 리프레시 토큰 전송
         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-          withCredentials: true // 쿠키 포함
+          withCredentials: true
         });
-
-        const { token } = response.data;
-        
-        // tokenManager로 토큰 업데이트
-        tokenManager.setToken(token);
-
-        // 갱신된 토큰으로 원래 요청 재시도
-        originalRequest.headers.Authorization = `Bearer ${token}`;
+        const newToken = response.data; // 백엔드에서 토큰 문자열 직접 반환
+        tokenManager.setToken(newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // 리프레시 실패 시 로그아웃 처리
+        // 토큰 갱신 실패 시 로그아웃 처리
         tokenManager.clearAuth();
         window.location.href = '/login';
         return Promise.reject(refreshError);
