@@ -36,7 +36,6 @@ export interface SignupResponse {
 
 export interface AuthState {
   token: string | null;
-  refreshToken: string | null;
   user: UserDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;

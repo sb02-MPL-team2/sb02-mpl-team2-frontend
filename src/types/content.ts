@@ -11,6 +11,7 @@ export interface ContentResponseDto {
   reviewCount: number;
   watchCount: number;
   createdAt: string;
+  roomId: number | null;
 }
 
 // Alias for convenience

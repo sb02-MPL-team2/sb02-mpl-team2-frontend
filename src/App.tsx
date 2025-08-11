@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { useAuthStore } from '@/stores/authStore'
 
 // Import components
 import LoginPage from '@/pages/login-page'
@@ -120,6 +122,12 @@ const router = createBrowserRouter([
 ])
 
 export default function App() {
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+  useEffect(() => {
+    // 앱 시작 시 한 번만 토큰 자동 복원 시도
+    initializeAuth();
+  }, []); // 종속성 배열 제거 - 앱 시작 시 한 번만 실행
 
   return <RouterProvider router={router} />
 }

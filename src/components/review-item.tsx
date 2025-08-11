@@ -14,8 +14,8 @@ export function ReviewItem({ review }: ReviewItemProps) {
       <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10">
           <AvatarImage 
-            src={review.author.profileUrl || "/placeholder.svg"} 
-            alt={review.author.username} 
+            src={review.author?.profileUrl || "/placeholder.svg"} 
+            alt={review.author?.username || "사용자"} 
           />
           <AvatarFallback className="bg-purple-100">
             <User className="h-5 w-5 text-purple-600" />
@@ -25,7 +25,7 @@ export function ReviewItem({ review }: ReviewItemProps) {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <span className="font-medium">{review.author.username}</span>
+              <span className="font-medium">{review.author?.username || "알 수 없음"}</span>
               <div className="flex items-center gap-1 mt-1">
                 {[...Array(5)].map((_, i) => (
                   <Star 

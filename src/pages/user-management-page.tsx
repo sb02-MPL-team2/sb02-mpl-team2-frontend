@@ -115,8 +115,8 @@ export default function UserManagementPage() {
     
     // 상태 필터
     const matchesStatus = statusFilter === "all" ||
-                         (statusFilter === "active" && !user.locked) ||
-                         (statusFilter === "locked" && user.locked)
+                         (statusFilter === "active" && !user.isLocked) ||
+                         (statusFilter === "locked" && user.isLocked)
     
     return matchesSearch && matchesRole && matchesStatus
   })
@@ -147,7 +147,7 @@ export default function UserManagementPage() {
       return
     }
 
-    const action = user.locked ? '계정 잠금 해제' : '계정 잠금'
+    const action = user.isLocked ? '계정 잠금 해제' : '계정 잠금'
     
     setConfirmDialog({
       isOpen: true,
@@ -187,7 +187,7 @@ export default function UserManagementPage() {
     } else if (confirmDialog.type === 'lock') {
       const user = users.find((u: UserDto) => u.id === confirmDialog.userId)
       if (user) {
-        if (user.locked) {
+        if (user.isLocked) {
           unlockUserMutation.mutate(confirmDialog.userId)
         } else {
           lockUserMutation.mutate(confirmDialog.userId)
@@ -311,8 +311,8 @@ export default function UserManagementPage() {
                         <UserRoleBadge role={user.role} />
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.locked ? "destructive" : "secondary"}>
-                          {user.locked ? "잠금" : "활성"}
+                        <Badge variant={user.isLocked ? "destructive" : "secondary"}>
+                          {user.isLocked ? "잠금" : "활성"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-gray-600">
@@ -343,13 +343,13 @@ export default function UserManagementPage() {
                           
                           {/* 잠금 버튼 */}
                           <Button
-                            variant={user.locked ? "default" : "outline"}
+                            variant={user.isLocked ? "default" : "outline"}
                             size="sm"
                             onClick={() => handleLockToggle(user)}
                             disabled={user.id === currentUser?.id || isActionLoading}
-                            className={user.locked ? "bg-green-600 hover:bg-green-700" : ""}
+                            className={user.isLocked ? "bg-green-600 hover:bg-green-700" : ""}
                           >
-                            {user.locked ? (
+                            {user.isLocked ? (
                               <>
                                 <Unlock className="h-4 w-4 mr-1" />
                                 잠금 해제

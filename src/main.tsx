@@ -7,11 +7,12 @@ import App from './App'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // StrictMode 임시 제거 - 개발 중 useEffect 중복 실행 방지
+  // <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
       {/* 개발 환경에서만 React Query DevTools 표시 */}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 )
