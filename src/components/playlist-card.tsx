@@ -16,7 +16,7 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
       <Card className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer">
         <CardContent className="p-6 space-y-4 h-full flex flex-col">
           {/* Title */}
-          <h3 className="text-xl font-bold text-gray-900 line-clamp-2 flex-shrink-0">{playlist.title || playlist.summary}</h3>
+          <h3 className="text-xl font-bold text-gray-900 line-clamp-2 flex-shrink-0">{playlist.title}</h3>
 
           {/* Content Summary */}
           <p className="text-gray-700 line-clamp-2 flex-1">{playlist.description || "설명이 없습니다."}</p>
@@ -27,11 +27,11 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
               {new Date(playlist.updatedAt).toLocaleDateString('ko-KR')} 업데이트
             </p>
             <p className="text-sm text-gray-500">
-              {playlist.subscriberCount}명이 구독중
+              {(playlist.subscribeCount ?? playlist.subscriberCount ?? 0)}명이 구독중
             </p>
+            {/* Summary with content count */}
             <p className="text-sm text-gray-500">
-              {/* TODO: 백엔드에서 totalContentCount 필드 추가되면 playlist.totalContentCount 사용 */}
-              {playlist.items?.length || 0}개의 콘텐츠
+              {playlist.summary} 포함 {playlist.totalContent}개의 콘텐츠
             </p>
           </div>
         </CardContent>

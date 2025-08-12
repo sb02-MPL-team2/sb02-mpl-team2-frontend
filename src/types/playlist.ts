@@ -14,12 +14,13 @@ export interface PlaylistDto {
   updatedAt: string;
   title: string;
   description: string;
-  subscriberCount: number;
-  // TODO: 백엔드에서 totalContentCount 필드 추가 필요
-  // 현재는 items.length로 계산하고 있지만, 성능상 백엔드에서 카운트를 계산해서 내려주는 것이 좋음
-  profile: UserSlimDto;
-  items: PlaylistItemDto[];
-  contentResponseDtoList: ContentResponseDto[];
+  summary?: string;
+  subscriberCount?: number; // 구버전 호환성
+  subscribeCount?: number;  // 신버전 필드명
+  totalContent: number;     // 백엔드에서 계산된 콘텐츠 개수
+  profile?: UserSlimDto;    // 선택적 필드로 변경
+  items?: PlaylistItemDto[]; // 선택적 필드로 변경
+  contentResponseDtoList?: ContentResponseDto[]; // 선택적 필드로 변경
 }
 
 export interface PlaylistCreateRequest {
