@@ -268,7 +268,7 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
                     )}
                   </div>
                   
-                  <div className="text-gray-600">구독자: {playlist.subscriberCount}명</div>
+                  <div className="text-gray-600">구독자: {playlist.subscribeCount}명</div>
                 </div>
 
                 {/* Description */}

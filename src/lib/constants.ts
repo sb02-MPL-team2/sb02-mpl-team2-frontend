@@ -28,7 +28,8 @@ export const API_ENDPOINTS = {
   PLAYLIST_BY_CONTENT: (contentId: number) => `/playlist/content/${contentId}`,
   PLAYLIST_ADD_CONTENT: '/playlist/add',
   PLAYLIST_ADD_CONTENT_LIST: '/playlist/add-list',
-  PLAYLIST_SUBSCRIBE: (playlistId: number) => `/playlist/${playlistId}/subscribe`,
+  PLAYLIST_SUBSCRIBE: '/playlist/subscribe',
+  PLAYLIST_UNSUBSCRIBE: '/playlist/unsubscribe',
   PLAYLIST_SUBSCRIBED: '/playlist/subscribed',
   PLAYLIST_SUBSCRIBED_BY_USER: (userId: number) => `/playlist/subscribed/user/${userId}`,
   

@@ -11,14 +11,15 @@ export interface PlaylistItem {
 
 export interface PlaylistDto {
   id: number;
-  userId: number;
-  title: string;
-  description: string;
-  subscriberCount: number;
-  trackCount?: number; // 트랙 수 (items.length 대신 서버에서 계산)
-  createdAt: string;
+  userId?: number;
+  title?: string;        // 상세 조회 시에만 있음
+  summary: string;       // 목록 조회 시 플레이리스트 이름 (백엔드 응답)
+  description?: string;  // 상세 조회 시에만 있음
+  subscribeCount: number; // 백엔드 응답 필드명으로 통일
+  totalContent: number;   // 백엔드 응답 필드명으로 통일
+  createdAt?: string;
   updatedAt: string;
-  items: PlaylistItem[];
+  items?: PlaylistItem[]; // 상세 조회 시에만 있음
 }
 
 export interface PlaylistCreateRequest {
