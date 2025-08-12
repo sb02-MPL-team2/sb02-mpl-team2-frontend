@@ -6,12 +6,12 @@ export interface ContentResponseDto {
   title: string;
   description: string;
   category: string;
-  binaryContentUrl: string;
+  imageUrl: string;
   totalRating: number;
   reviewCount: number;
   watchCount: number;
-  createdAt: string;
-  roomId: number | null;
+  createdAt?: string;
+  roomId?: number | null;
 }
 
 // Alias for convenience

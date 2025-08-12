@@ -28,9 +28,9 @@ export function ContentDetailSection({ content }: ContentDetailSectionProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Content Image */}
             <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-              {content.binaryContentUrl ? (
+              {content.imageUrl ? (
                 <img 
-                  src={content.binaryContentUrl} 
+                  src={content.imageUrl} 
                   alt={content.title}
                   className="w-full h-full object-cover"
                 />
@@ -51,8 +51,8 @@ export function ContentDetailSection({ content }: ContentDetailSectionProps) {
                 className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
               >
                 <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span className="font-medium">{content.totalRating.toFixed(1)}</span>
-                <span className="text-gray-500">({content.reviewCount})</span>
+                <span className="font-medium">{content.totalRating?.toFixed(1) || '0.0'}</span>
+                <span className="text-gray-500">({content.reviewCount || 0})</span>
               </Link>
 
               <div className="mt-2">
@@ -64,7 +64,7 @@ export function ContentDetailSection({ content }: ContentDetailSectionProps) {
               <p className="text-gray-600 text-sm leading-relaxed">{content.description}</p>
               
               <div className="text-sm text-gray-500">
-                <span>조회수: {content.watchCount.toLocaleString()}회</span>
+                <span>조회수: {(content.watchCount || 0).toLocaleString()}회</span>
               </div>
             </div>
           </div>

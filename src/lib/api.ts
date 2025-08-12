@@ -58,6 +58,7 @@ apiClient.interceptors.request.use(
  * 1. 401 Unauthorized 에러 시 리프레시 토큰(쿠키)으로 자동 토큰 갱신
  * 2. 토큰 갱신 실패 시 로그인 페이지로 자동 리다이렉트
  * 3. 갱신된 토큰으로 원래 요청 재시도
+ * 4. 네트워크 에러 시 로그아웃 방지 (인증 관련 요청 제외)
  */
 apiClient.interceptors.response.use(
   (response) => {
@@ -68,6 +69,12 @@ apiClient.interceptors.response.use(
 
     // 인증 관련 요청인 경우 토큰 갱신 시도하지 않음
     if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/signup')) {
+      return Promise.reject(error);
+    }
+
+    // 네트워크 에러 (서버 연결 불가) 시 로그아웃하지 않고 에러만 전파
+    if (!error.response) {
+      console.warn('Network error - server unavailable:', error.message);
       return Promise.reject(error);
     }
 
@@ -83,9 +90,11 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // 토큰 갱신 실패 시 로그아웃 처리
-        tokenManager.clearAuth();
-        window.location.href = '/login';
+        // 토큰 갱신 실패 시에만 로그아웃 처리 (네트워크 에러가 아닌 경우만)
+        if (refreshError.response?.status === 401 || refreshError.response?.status === 403) {
+          tokenManager.clearAuth();
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

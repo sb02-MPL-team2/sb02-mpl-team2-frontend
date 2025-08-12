@@ -19,9 +19,9 @@ export function ContentCard({ content }: ContentCardProps) {
       <Link to={`/watch/${content.id}`} className="block">
         {/* Image */}
         <div className="aspect-video bg-gray-200 flex items-center justify-center">
-          {content.binaryContentUrl ? (
+          {content.imageUrl ? (
             <img 
-              src={content.binaryContentUrl} 
+              src={content.imageUrl} 
               alt={content.title}
               className="w-full h-full object-cover"
             />
