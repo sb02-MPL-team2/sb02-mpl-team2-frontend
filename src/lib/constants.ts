@@ -39,10 +39,10 @@ export const API_ENDPOINTS = {
   REVIEWS_BY_USER: (userId: number) => `/reviews/users/${userId}`,
   
   // Follows
-  FOLLOW_USER: (userId: number) => `/follows/${userId}`,
-  FOLLOW_STATUS: (userId: number) => `/follows/${userId}/status`,
-  FOLLOWERS: (userId: number) => `/follows/followers/${userId}`,
-  FOLLOWING: (userId: number) => `/follows/following/${userId}`,
+  FOLLOW_USER: (followeeId: number) => `/follows/${followeeId}`,
+  FOLLOW_STATUS: (followeeId: number) => `/follows/${followeeId}`,
+  FOLLOWERS: (userId: number) => `/follows/${userId}/followers`,
+  FOLLOWING: (userId: number) => `/follows/${userId}/followings`,
   
   // Admin
   ADMIN_USERS: '/admin/users',

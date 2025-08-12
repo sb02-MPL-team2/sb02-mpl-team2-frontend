@@ -20,7 +20,7 @@ interface UserProfileCardProps {
     username: string
     avatar: string
     followerCount: number
-    role?: 'ADMIN' | 'USER'
+    role?: 'ADMIN' | 'MANAGER' | 'USER'
     isFollowing: boolean // Add isFollowing to props
   }
 }

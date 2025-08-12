@@ -47,11 +47,13 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
   const creator = playlist?.profile
 
   // 내 팔로워 목록 조회 (공유용)
-  const { data: myFollowers = [] } = useQuery({
+  const { data: myFollowersResponse } = useQuery({
     queryKey: QUERY_KEYS.FOLLOWERS(user?.id || 0),
-    queryFn: () => user ? followService.getFollowers(user.id) : Promise.resolve([]),
+    queryFn: () => user ? followService.getFollowers(user.id, undefined, 100) : Promise.resolve({ userList: [], nextCursor: null, hasNext: false }),
     enabled: !!user?.id && isShareDialogOpen // 공유 다이얼로그가 열릴 때만 조회
   })
+
+  const myFollowers = myFollowersResponse?.userList || []
 
   // 플레이리스트 구독/구독해제 mutation
   const subscribeMutation = useMutation({

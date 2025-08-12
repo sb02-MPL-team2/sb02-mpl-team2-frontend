@@ -25,16 +25,16 @@ export const userService = {
   // 사용자 정보 수정
   updateUser: async (userId: number, data: UserUpdateRequest, profileFile?: File): Promise<UserDto> => {
     const formData = new FormData();
-    formData.append('userUpdateRequest', JSON.stringify(data));
+    
+    // Spring Boot의 @RequestPart를 위한 JSON Blob 생성 (회원가입 API와 동일한 방식)
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    formData.append('userUpdateRequest', blob);
+    
     if (profileFile) {
       formData.append('profile', profileFile);
     }
 
-    const response = await apiClient.put<UserDto>(API_ENDPOINTS.USER_BY_ID(userId), formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.put<UserDto>(API_ENDPOINTS.USER_BY_ID(userId), formData);
     return response.data;
   },
 

@@ -32,12 +32,14 @@ export default function ProfilesPage() {
   })
 
   // 현재 유저가 팔로우하는 사용자들의 ID 목록 조회
-  const { data: followingUsers = [] } = useQuery({
+  const { data: followingResponse } = useQuery({
     queryKey: ['following', currentUser?.id],
-    queryFn: () => currentUser ? followService.getFollowing(currentUser.id) : Promise.resolve([]),
+    queryFn: () => currentUser ? followService.getFollowing(currentUser.id, undefined, 100) : Promise.resolve({ userList: [], nextCursor: null, hasNext: false }),
     enabled: !!currentUser?.id,
     retry: 1
   })
+
+  const followingUsers = followingResponse?.userList || []
 
   // 사용자 목록에 팔로우 상태 정보 추가
   const usersWithFollowStatus: UserWithFollowStatus[] = useMemo(() => {

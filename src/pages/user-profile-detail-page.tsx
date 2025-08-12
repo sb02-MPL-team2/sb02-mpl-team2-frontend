@@ -40,7 +40,7 @@ export default function UserProfileDetailPage({ userId }: UserProfileDetailPageP
   // 해당 사용자의 플레이리스트 조회
   const { data: userPlaylistsResponse, isLoading: isLoadingPlaylists } = useQuery({
     queryKey: ['playlists', 'user', userIdNumber],
-    queryFn: () => playlistService.getUserPlaylists(userIdNumber, 0, 50), // 첫 페이지, 50개
+    queryFn: () => playlistService.getUserPlaylists(userIdNumber, undefined, 50), // 첫 페이지, 50개
     enabled: !!userId && userIdNumber > 0,
     retry: 1
   })
@@ -55,26 +55,26 @@ export default function UserProfileDetailPage({ userId }: UserProfileDetailPageP
     retry: 1
   })
 
-  // 현재 유저의 팔로잉 목록에서 이 사용자 팔로우 여부 확인
-  const { data: followingUsers = [] } = useQuery({
-    queryKey: ['following', currentUser?.id],
-    queryFn: () => currentUser ? followService.getFollowing(currentUser.id) : Promise.resolve([]),
-    enabled: !!currentUser?.id && !isOwnProfile,
+  // 특정 사용자에 대한 팔로우 상태 확인 (올바른 API 사용)
+  const { data: followStatusResponse } = useQuery({
+    queryKey: QUERY_KEYS.FOLLOW_STATUS(userIdNumber),
+    queryFn: () => followService.getFollowStatus(userIdNumber),
+    enabled: !!currentUser?.id && !isOwnProfile && !!userIdNumber,
     retry: 1
   })
 
   // 팔로우 상태 계산
   const isFollowing = useMemo(() => {
     if (isOwnProfile) return false
-    return followingUsers.some(user => user.id === userIdNumber)
-  }, [followingUsers, userIdNumber, isOwnProfile])
+    return followStatusResponse?.isFollowing || false
+  }, [followStatusResponse, isOwnProfile])
 
   // 팔로우/언팔로우 mutation
   const followMutation = useMutation({
     mutationFn: (userId: number) => followService.followUser(userId),
     onSuccess: () => {
       setIsFollowingState(true)
-      queryClient.invalidateQueries({ queryKey: ['following', currentUser?.id] })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOLLOW_STATUS(userIdNumber) })
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER(userIdNumber) })
     },
     onError: () => {
@@ -86,7 +86,7 @@ export default function UserProfileDetailPage({ userId }: UserProfileDetailPageP
     mutationFn: (userId: number) => followService.unfollowUser(userId),
     onSuccess: () => {
       setIsFollowingState(false)
-      queryClient.invalidateQueries({ queryKey: ['following', currentUser?.id] })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FOLLOW_STATUS(userIdNumber) })
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER(userIdNumber) })
     },
     onError: () => {
