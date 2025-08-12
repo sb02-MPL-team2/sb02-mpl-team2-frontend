@@ -24,21 +24,22 @@ export default function PlaylistsPage() {
   const queryClient = useQueryClient()
 
   // 모든 공개 플레이리스트 조회 (기본)
-  const { data: allPlaylists = [], isLoading: isLoadingAllPlaylists, error: allPlaylistsError } = useQuery({
+  const { data: allPlaylistsResponse, isLoading: isLoadingAllPlaylists, error: allPlaylistsError } = useQuery({
     queryKey: QUERY_KEYS.ALL_PLAYLISTS,
-    queryFn: playlistService.getAllPlaylists,
+    queryFn: () => playlistService.getAllPlaylists(),
     enabled: subscriptionFilter === "all" || subscriptionFilter === "unsubscribed"
   })
 
-  // 구독한 플레이리스트 조회 (필터가 "구독한 플레이리스트"일 때만)
+  // 구독한 플레이리스트 조회는 임시로 비활성화 (백엔드 구현 필요)
   const { data: subscribedPlaylists = [], isLoading: isLoadingSubscribed, error: subscribedError } = useQuery({
     queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS,
-    queryFn: playlistService.getSubscribedPlaylists,
-    enabled: !!user?.id && subscriptionFilter === "subscribed",
+    queryFn: () => Promise.resolve([]), // 임시로 빈 배열 반환
+    enabled: false, // 현재 비활성화
     retry: 1
   })
 
   // 현재 표시할 플레이리스트 결정
+  const allPlaylists = allPlaylistsResponse?.content || []
   const currentPlaylists = subscriptionFilter === "subscribed" ? subscribedPlaylists : allPlaylists
   
   // 직접 필터링 (검색어만 적용)

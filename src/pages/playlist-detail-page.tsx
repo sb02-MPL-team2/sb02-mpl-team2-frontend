@@ -36,19 +36,15 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
     queryFn: () => playlistService.getPlaylistById(parseInt(playlistId))
   })
 
-  // 구독한 플레이리스트 목록 조회 (구독 상태 확인용)
+  // 구독한 플레이리스트 목록 조회는 임시로 비활성화 (백엔드 구현 필요)
   const { data: subscribedPlaylists = [] } = useQuery({
     queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS,
-    queryFn: playlistService.getSubscribedPlaylists,
-    enabled: !!user?.id
+    queryFn: () => Promise.resolve([]), // 임시로 빈 배열 반환
+    enabled: false // 현재 비활성화
   })
 
-  // 플레이리스트 생성자 정보 조회
-  const { data: creator } = useQuery({
-    queryKey: QUERY_KEYS.USER(playlist?.userId || 0),
-    queryFn: () => playlist ? userService.getUserById(playlist.userId) : Promise.resolve(null),
-    enabled: !!playlist?.userId
-  })
+  // 플레이리스트 생성자 정보는 playlist.profile에서 가져옴
+  const creator = playlist?.profile
 
   // 내 팔로워 목록 조회 (공유용)
   const { data: myFollowers = [] } = useQuery({
@@ -82,8 +78,8 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
 
   // 콘텐츠 제거 mutation
   const removeContentMutation = useMutation({
-    mutationFn: ({ playlistId, itemId }: { playlistId: number, itemId: number }) => 
-      playlistService.removeContentFromPlaylist(playlistId, itemId),
+    mutationFn: ({ playlistId, contentId }: { playlistId: number, contentId: number }) => 
+      playlistService.removeContentFromPlaylist(playlistId, contentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYLIST(parseInt(playlistId)) })
       alert('콘텐츠가 플레이리스트에서 제거되었습니다.')
@@ -109,7 +105,7 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
     }
   }
 
-  const handleRemoveContent = (itemId: number) => {
+  const handleRemoveContent = (contentId: number) => {
     if (!isOwner && user?.id !== creator?.id) {
       alert('플레이리스트 소유자만 콘텐츠를 제거할 수 있습니다.')
       return
@@ -117,7 +113,7 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
     
     removeContentMutation.mutate({ 
       playlistId: parseInt(playlistId), 
-      itemId 
+      contentId 
     })
   }
 
@@ -268,7 +264,7 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
                     )}
                   </div>
                   
-                  <div className="text-gray-600">구독자: {playlist.subscribeCount}명</div>
+                  <div className="text-gray-600">구독자: {playlist.subscriberCount}명</div>
                 </div>
 
                 {/* Description */}
@@ -287,30 +283,33 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
 
           {/* Content Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {playlist.items.map((item) => (
-              <div key={item.id} className="relative group">
-                {item.content && <ContentCard content={item.content} />}
-                {/* Remove Button - 소유자이거나 큐레이터가 본인일 때만 표시 */}
-                {(isOwner || user?.id === creator?.id) && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 h-8 w-8 bg-white/80 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    onClick={(e) => {
-                      e.preventDefault() // Prevent navigation when clicking the X button
-                      handleRemoveContent(item.id)
-                    }}
-                    disabled={removeContentMutation.isPending}
-                  >
-                    <X className="h-4 w-4 text-gray-600" />
-                  </Button>
-                )}
-              </div>
-            ))}
+            {playlist.contentResponseDtoList.map((content, index) => {
+              const item = playlist.items[index]; // 해당 인덱스의 아이템 정보
+              return (
+                <div key={content.id} className="relative group">
+                  <ContentCard content={content} />
+                  {/* Remove Button - 소유자이거나 큐레이터가 본인일 때만 표시 */}
+                  {(isOwner || user?.id === creator?.id) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 bg-white/80 hover:bg-white shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      onClick={(e) => {
+                        e.preventDefault() // Prevent navigation when clicking the X button
+                        handleRemoveContent(content.id)
+                      }}
+                      disabled={removeContentMutation.isPending}
+                    >
+                      <X className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           {/* Empty State (when no contents) */}
-          {playlist.items.length === 0 && (
+          {playlist.contentResponseDtoList.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">이 플레이리스트에는 아직 콘텐츠가 없습니다.</p>
             </div>

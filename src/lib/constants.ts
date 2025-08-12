@@ -22,16 +22,15 @@ export const API_ENDPOINTS = {
   CONTENTS_BY_CATEGORY: (category: string) => `/contents/category/${category}`,
   
   // Playlists
-  PLAYLISTS: '/playlist',
-  PLAYLIST_BY_ID: (playlistId: number) => `/playlist/${playlistId}`,
-  PLAYLIST_BY_USER: (userId: number) => `/playlist/user/${userId}`,
-  PLAYLIST_BY_CONTENT: (contentId: number) => `/playlist/content/${contentId}`,
-  PLAYLIST_ADD_CONTENT: '/playlist/add',
-  PLAYLIST_ADD_CONTENT_LIST: '/playlist/add-list',
-  PLAYLIST_SUBSCRIBE: '/playlist/subscribe',
-  PLAYLIST_UNSUBSCRIBE: '/playlist/unsubscribe',
-  PLAYLIST_SUBSCRIBED: '/playlist/subscribed',
-  PLAYLIST_SUBSCRIBED_BY_USER: (userId: number) => `/playlist/subscribed/user/${userId}`,
+  PLAYLISTS: '/playlists',
+  PLAYLIST_BY_ID: (playlistId: number) => `/playlists/${playlistId}`,
+  PLAYLIST_BY_USER: (userId: number) => `/playlists/user/${userId}`,
+  PLAYLIST_ADD_CONTENT: '/playlists/items',
+  PLAYLIST_ADD_CONTENT_LIST: '/playlists/items/bulk',
+  PLAYLIST_SUBSCRIBE: '/playlists/subscribe',
+  PLAYLIST_UNSUBSCRIBE: '/playlists/unsubscribe',
+  PLAYLIST_SUBSCRIBED: '/playlists/subscribed',
+  PLAYLIST_SUBSCRIBED_BY_USER: (userId: number) => `/playlists/subscribed/user/${userId}`,
   
   // Reviews
   REVIEWS: '/reviews',

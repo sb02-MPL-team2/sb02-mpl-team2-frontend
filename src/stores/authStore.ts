@@ -87,6 +87,13 @@ export const useAuthStore = create<AuthStore>((set, get) => {
       },
 
       initializeAuth: async () => {
+        // 현재 경로가 로그인 관련 페이지인 경우 토큰 복원 시도하지 않음
+        const currentPath = window.location.pathname;
+        if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/') {
+          set({ isLoading: false });
+          return;
+        }
+
         set({ isLoading: true });
         try {
           // 쿠키에 refresh token이 있는지 확인하고 토큰 갱신 시도

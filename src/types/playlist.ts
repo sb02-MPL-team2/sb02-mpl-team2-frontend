@@ -1,25 +1,25 @@
 import { ContentResponseDto } from './content';
+import { UserSlimDto } from './user';
 
 // Playlist related types
-export interface PlaylistItem {
+export interface PlaylistItemDto {
   id: number;
   contentId: number;
-  orderIndex: number;
-  createdAt: string;
-  content?: ContentResponseDto; // enriched when fetched
 }
 
 export interface PlaylistDto {
   id: number;
-  userId?: number;
-  title?: string;        // 상세 조회 시에만 있음
-  summary: string;       // 목록 조회 시 플레이리스트 이름 (백엔드 응답)
-  description?: string;  // 상세 조회 시에만 있음
-  subscribeCount: number; // 백엔드 응답 필드명으로 통일
-  totalContent: number;   // 백엔드 응답 필드명으로 통일
-  createdAt?: string;
+  userId: number;
+  createdAt: string;
   updatedAt: string;
-  items?: PlaylistItem[]; // 상세 조회 시에만 있음
+  title: string;
+  description: string;
+  subscriberCount: number;
+  // TODO: 백엔드에서 totalContentCount 필드 추가 필요
+  // 현재는 items.length로 계산하고 있지만, 성능상 백엔드에서 카운트를 계산해서 내려주는 것이 좋음
+  profile: UserSlimDto;
+  items: PlaylistItemDto[];
+  contentResponseDtoList: ContentResponseDto[];
 }
 
 export interface PlaylistCreateRequest {
@@ -42,6 +42,14 @@ export interface PlaylistItemListRequest {
   contentIds: number[];
 }
 
+// Cursor-based pagination response
+export interface CursorPageResponsePlayListDto {
+  content: PlaylistDto[];
+  size: number;
+  hasNext: boolean;
+  nextCursor: string | null;
+}
+
 export interface PlaylistState {
   playlists: PlaylistDto[];
   selectedPlaylist: PlaylistDto | null;
@@ -51,9 +59,6 @@ export interface PlaylistState {
 }
 
 // Subscription related types
-export interface PlaylistSubscription {
-  id: number;
-  userId: number;
+export interface SubscribeRequest {
   playlistId: number;
-  createdAt: string;
 }
