@@ -51,7 +51,7 @@ export default function UserManagementPage() {
 
   // 권한 변경 mutation
   const updateRoleMutation = useMutation({
-    mutationFn: ({ userId, role }: { userId: number; role: 'ADMIN' | 'USER' }) =>
+    mutationFn: ({ userId, role }: { userId: number; role: 'ADMIN' | 'MANAGER' | 'USER' }) =>
       adminService.updateUserRole(userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS })
@@ -111,25 +111,27 @@ export default function UserManagementPage() {
     // 역할 필터
     const matchesRole = roleFilter === "all" || 
                        (roleFilter === "admin" && user.role === USER_ROLES.ADMIN) ||
+                       (roleFilter === "manager" && user.role === USER_ROLES.MANAGER) ||
                        (roleFilter === "user" && user.role === USER_ROLES.USER)
     
     // 상태 필터
     const matchesStatus = statusFilter === "all" ||
-                         (statusFilter === "active" && !user.isLocked) ||
-                         (statusFilter === "locked" && user.isLocked)
+                         (statusFilter === "active" && !user.isLocked && !user.isDeleted) ||
+                         (statusFilter === "locked" && user.isLocked && !user.isDeleted) ||
+                         (statusFilter === "deleted" && user.isDeleted)
     
     return matchesSearch && matchesRole && matchesStatus
   })
 
-  // 권한 변경 핸들러
-  const handleRoleChange = (user: UserDto) => {
+  // MANAGER 권한 부여/해제 핸들러
+  const handleManagerRoleToggle = (user: UserDto) => {
     if (user.id === currentUser?.id) {
       alert('자신의 권한은 변경할 수 없습니다.')
       return
     }
 
-    const newRole = user.role === USER_ROLES.ADMIN ? USER_ROLES.USER : USER_ROLES.ADMIN
-    const action = newRole === USER_ROLES.ADMIN ? '관리자 권한 부여' : '관리자 권한 해제'
+    const newRole = user.role === USER_ROLES.MANAGER ? USER_ROLES.USER : USER_ROLES.MANAGER
+    const action = newRole === USER_ROLES.MANAGER ? '매니저 권한 부여' : '매니저 권한 해제'
     
     setConfirmDialog({
       isOpen: true,
@@ -144,6 +146,11 @@ export default function UserManagementPage() {
   const handleLockToggle = (user: UserDto) => {
     if (user.id === currentUser?.id) {
       alert('자신의 계정은 잠금할 수 없습니다.')
+      return
+    }
+
+    if (currentUser?.role === USER_ROLES.MANAGER && user.role === USER_ROLES.ADMIN) {
+      alert('매니저는 운영자 계정을 잠금할 수 없습니다.')
       return
     }
 
@@ -165,6 +172,11 @@ export default function UserManagementPage() {
       return
     }
 
+    if (currentUser?.role === USER_ROLES.MANAGER && user.role === USER_ROLES.ADMIN) {
+      alert('매니저는 운영자 계정을 삭제할 수 없습니다.')
+      return
+    }
+
     setConfirmDialog({
       isOpen: true,
       type: 'delete',
@@ -181,7 +193,7 @@ export default function UserManagementPage() {
     if (confirmDialog.type === 'role') {
       const user = users.find((u: UserDto) => u.id === confirmDialog.userId)
       if (user) {
-        const newRole = user.role === USER_ROLES.ADMIN ? USER_ROLES.USER : USER_ROLES.ADMIN
+        const newRole = user.role === USER_ROLES.MANAGER ? USER_ROLES.USER : USER_ROLES.MANAGER
         updateRoleMutation.mutate({ userId: confirmDialog.userId, role: newRole })
       }
     } else if (confirmDialog.type === 'lock') {
@@ -255,6 +267,7 @@ export default function UserManagementPage() {
                 <SelectContent>
                   <SelectItem value="all">모든 역할</SelectItem>
                   <SelectItem value="admin">관리자</SelectItem>
+                  <SelectItem value="manager">매니저</SelectItem>
                   <SelectItem value="user">일반사용자</SelectItem>
                 </SelectContent>
               </Select>
@@ -268,6 +281,7 @@ export default function UserManagementPage() {
                   <SelectItem value="all">모든 상태</SelectItem>
                   <SelectItem value="active">활성</SelectItem>
                   <SelectItem value="locked">잠금</SelectItem>
+                  <SelectItem value="deleted">삭제됨</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -311,8 +325,8 @@ export default function UserManagementPage() {
                         <UserRoleBadge role={user.role} />
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.isLocked ? "destructive" : "secondary"}>
-                          {user.isLocked ? "잠금" : "활성"}
+                        <Badge variant={user.isDeleted ? "outline" : user.isLocked ? "destructive" : "secondary"}>
+                          {user.isDeleted ? "삭제됨" : user.isLocked ? "잠금" : "활성"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-gray-600">
@@ -320,33 +334,43 @@ export default function UserManagementPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          {/* 권한 변경 버튼 */}
-                          <Button
-                            variant={user.role === USER_ROLES.ADMIN ? "outline" : "default"}
-                            size="sm"
-                            onClick={() => handleRoleChange(user)}
-                            disabled={user.id === currentUser?.id || isActionLoading}
-                            className={user.role === USER_ROLES.ADMIN ? "" : "bg-purple-600 hover:bg-purple-700"}
-                          >
-                            {user.role === USER_ROLES.ADMIN ? (
-                              <>
-                                <ShieldCheck className="h-4 w-4 mr-1" />
-                                권한 해제
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="h-4 w-4 mr-1" />
-                                권한 부여
-                              </>
-                            )}
-                          </Button>
+                          {/* MANAGER 권한 관리 버튼 (ADMIN만 볼 수 있음) */}
+                          {currentUser?.role === USER_ROLES.ADMIN && user.role !== USER_ROLES.ADMIN && (
+                            <Button
+                              variant={user.role === USER_ROLES.MANAGER ? "outline" : "default"}
+                              size="sm"
+                              onClick={() => handleManagerRoleToggle(user)}
+                              disabled={user.id === currentUser?.id || isActionLoading || user.isDeleted}
+                              className={user.role === USER_ROLES.MANAGER ? 
+                                "text-blue-600 border-blue-200 hover:bg-blue-50" : 
+                                "bg-blue-600 hover:bg-blue-700 text-white"
+                              }
+                            >
+                              {user.role === USER_ROLES.MANAGER ? (
+                                <>
+                                  <ShieldCheck className="h-4 w-4 mr-1" />
+                                  매니저 해제
+                                </>
+                              ) : (
+                                <>
+                                  <Shield className="h-4 w-4 mr-1" />
+                                  매니저 권한
+                                </>
+                              )}
+                            </Button>
+                          )}
                           
                           {/* 잠금 버튼 */}
                           <Button
                             variant={user.isLocked ? "default" : "outline"}
                             size="sm"
                             onClick={() => handleLockToggle(user)}
-                            disabled={user.id === currentUser?.id || isActionLoading}
+                            disabled={
+                              user.id === currentUser?.id || 
+                              isActionLoading ||
+                              user.isDeleted ||
+                              (currentUser?.role === USER_ROLES.MANAGER && user.role === USER_ROLES.ADMIN)
+                            }
                             className={user.isLocked ? "bg-green-600 hover:bg-green-700" : ""}
                           >
                             {user.isLocked ? (
@@ -367,7 +391,12 @@ export default function UserManagementPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDeleteUser(user)}
-                            disabled={user.id === currentUser?.id || isActionLoading}
+                            disabled={
+                              user.id === currentUser?.id || 
+                              isActionLoading ||
+                              user.isDeleted ||
+                              (currentUser?.role === USER_ROLES.MANAGER && user.role === USER_ROLES.ADMIN)
+                            }
                             className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />

@@ -24,9 +24,10 @@ const adminNavigationItems = [
 export function Sidebar({ isOpen, activeRoute }: SidebarProps) {
   const { user } = useAuthStore()
   const isAdmin = user?.role === USER_ROLES.ADMIN
+  const isManager = user?.role === USER_ROLES.MANAGER
   
-  // 관리자인 경우에만 관리자 메뉴 추가
-  const navigationItems = isAdmin 
+  // 매니저 이상 권한인 경우에만 관리자 메뉴 추가
+  const navigationItems = (isAdmin || isManager)
     ? [...baseNavigationItems, ...adminNavigationItems]
     : baseNavigationItems
   return (

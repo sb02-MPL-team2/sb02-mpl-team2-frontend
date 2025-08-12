@@ -38,11 +38,11 @@ export const adminService = {
   /**
    * 사용자 권한 변경 (관리자 ↔ 일반사용자)
    * @param userId 권한을 변경할 사용자 ID
-   * @param role 새로운 역할 ('ADMIN' | 'USER')
+   * @param role 새로운 역할 ('ADMIN' | 'MANAGER' | 'USER')
    * @returns 업데이트된 사용자 정보
    * @throws 권한이 없거나 API 에러 시 예외 발생
    */
-  updateUserRole: async (userId: number, role: 'ADMIN' | 'USER'): Promise<UserDto> => {
+  updateUserRole: async (userId: number, role: 'ADMIN' | 'MANAGER' | 'USER'): Promise<UserDto> => {
     const response = await apiClient.put<UserDto>(API_ENDPOINTS.ADMIN_UPDATE_ROLE(userId), { role });
     return response.data;
   },

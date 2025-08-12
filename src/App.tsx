@@ -106,7 +106,7 @@ const router = createBrowserRouter([
   {
     path: "/admin/users",
     element: (
-      <ProtectedRoute requireAdmin>
+      <ProtectedRoute requireManager>
         <UserManagementPage />
       </ProtectedRoute>
     ),

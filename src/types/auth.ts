@@ -27,7 +27,7 @@ export interface SignupResponse {
   username: string;
   email: string;
   profileUrl: string;
-  role: 'ADMIN' | 'USER';
+  role: 'ADMIN' | 'MANAGER' | 'USER';
   isLocked: boolean;
   isDeleted: boolean;
   followerCount: number;
@@ -49,7 +49,7 @@ export interface UserDto {
   profileUrl: string;
   followerCount: number;
   followingCount: number;
-  role: 'ADMIN' | 'USER';
+  role: 'ADMIN' | 'MANAGER' | 'USER';
   isLocked: boolean;
   isDeleted: boolean;
   createdAt?: string;

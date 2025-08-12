@@ -7,6 +7,8 @@ interface ProtectedRouteProps {
   children: React.ReactNode
   /** 관리자 권한이 필요한 페이지인지 여부 (기본값: false) */
   requireAdmin?: boolean
+  /** 매니저 이상 권한이 필요한 페이지인지 여부 (기본값: false) */
+  requireManager?: boolean
 }
 
 /**
@@ -21,7 +23,7 @@ interface ProtectedRouteProps {
  * @param children 렌더링할 자식 컴포넌트
  * @param requireAdmin 관리자 권한 필요 여부 (기본값: false)
  */
-export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requireAdmin = false, requireManager = false }: ProtectedRouteProps) {
   const { isAuthenticated, user } = useAuthStore()
   const location = useLocation()
 
@@ -31,9 +33,13 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  // 관리자 권한이 필요한데 일반 사용자인 경우 404 페이지로 리다이렉트
-  // 실제 프로덕션에서는 403 Forbidden 페이지를 별도로 만드는 것이 좋음
+  // 관리자 권한이 필요한데 관리자가 아닌 경우 404 페이지로 리다이렉트
   if (requireAdmin && user?.role !== USER_ROLES.ADMIN) {
+    return <Navigate to="/404" replace />
+  }
+
+  // 매니저 이상 권한이 필요한데 일반 사용자인 경우 404 페이지로 리다이렉트
+  if (requireManager && user?.role === USER_ROLES.USER) {
     return <Navigate to="/404" replace />
   }
 
