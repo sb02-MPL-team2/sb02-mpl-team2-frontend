@@ -31,7 +31,7 @@ export function PlaylistCard({ playlist }: PlaylistCardProps) {
             </p>
             <p className="text-sm text-gray-500">
               {/* TODO: 백엔드에서 totalContentCount 필드 추가되면 playlist.totalContentCount 사용 */}
-              {playlist.items.length}개의 콘텐츠
+              {playlist.items?.length || 0}개의 콘텐츠
             </p>
           </div>
         </CardContent>
