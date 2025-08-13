@@ -20,7 +20,6 @@ export const NotificationPopover = () => {
     isConnected,
     markAsRead, 
     markAllAsRead, 
-    removeNotification,
     clearAllNotifications,
     reconnect
   } = useNotificationStore();
@@ -93,7 +92,6 @@ export const NotificationPopover = () => {
                   <NotificationItem
                     notification={notification}
                     onMarkAsRead={markAsRead}
-                    onRemove={removeNotification}
                   />
                   {index < notifications.length - 1 && (
                     <Separator className="my-1" />

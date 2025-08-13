@@ -1,4 +1,4 @@
-import { Check, Trash2 } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NotificationDto, NotificationType } from '@/types';
 
@@ -52,13 +52,11 @@ const getNotificationIcon = (type: NotificationType) => {
 interface NotificationItemProps {
   notification: NotificationDto;
   onMarkAsRead?: (id: number) => void;
-  onRemove?: (id: number) => void;
 }
 
 export function NotificationItem({ 
   notification, 
-  onMarkAsRead, 
-  onRemove 
+  onMarkAsRead 
 }: NotificationItemProps) {
   const timeAgo = getTimeAgo(notification.createdAt);
 
@@ -84,28 +82,17 @@ export function NotificationItem({
             </p>
           </div>
           
-          {(onMarkAsRead || onRemove) && (
+          {onMarkAsRead && (
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              {onMarkAsRead && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onMarkAsRead(notification.id)}
-                  className="h-6 w-6 p-0"
-                >
-                  <Check className="h-3 w-3" />
-                </Button>
-              )}
-              {onRemove && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => onRemove(notification.id)}
-                  className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onMarkAsRead(notification.id)}
+                className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+                title="읽음 처리"
+              >
+                <Check className="h-3 w-3" />
+              </Button>
             </div>
           )}
         </div>

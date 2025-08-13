@@ -1,8 +1,9 @@
+import { EventSourcePolyfill } from 'event-source-polyfill';
 import { NotificationDto } from '@/types';
 import { tokenManager } from './tokenManager';
 
 export class NotificationClient {
-  private eventSource: EventSource | null = null;
+  private eventSource: EventSourcePolyfill | null = null;
   private onNotificationCallback: ((notification: NotificationDto) => void) | null = null;
   private onConnectionStatusCallback: ((connected: boolean) => void) | null = null;
   private reconnectAttempts = 0;
@@ -24,15 +25,19 @@ export class NotificationClient {
         return;
       }
 
-      // URL에 토큰을 파라미터로 추가 (EventSource는 커스텀 헤더 제한)
-      const url = new URL('http://localhost:8080/sse');
-      url.searchParams.set('token', accessToken);
+      // event-source-polyfill로 헤더 지원
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${accessToken}`,
+      };
+      
       if (lastEventId) {
-        url.searchParams.set('lastEventId', lastEventId);
+        headers['Last-Event-ID'] = lastEventId;
       }
       
-      this.eventSource = new EventSource(url.toString(), {
-        withCredentials: true
+      this.eventSource = new EventSourcePolyfill('http://localhost:8080/sse', {
+        headers,
+        withCredentials: true,
+        heartbeatTimeout: 60000, // 60초 하트비트
       });
 
       this.eventSource.onopen = () => {
@@ -49,13 +54,42 @@ export class NotificationClient {
             localStorage.setItem('lastEventId', event.lastEventId);
           }
           
+          console.log('기본 메시지 수신:', notification);
           this.onNotificationCallback?.(notification);
         } catch (error) {
           console.error('알림 데이터 파싱 실패:', error);
         }
       };
 
-      this.eventSource.addEventListener('heartbeat', (event) => {
+      // 모든 알림 타입별 이벤트 리스너 등록
+      const notificationTypes = [
+        'NEW_MESSAGE',
+        'NEW_PLAYLIST_BY_FOLLOWING', 
+        'PLAYLIST_SUBSCRIBED',
+        'NEW_FOLLOWER',
+        'ROLE_CHANGED',
+        'ASYNC_FAILED',
+        'BROADCAST_TODAY_PLAYLIST'
+      ];
+
+      notificationTypes.forEach(type => {
+        this.eventSource.addEventListener(type, (event: MessageEvent) => {
+          try {
+            const notification: NotificationDto = JSON.parse(event.data);
+            
+            if (event.lastEventId) {
+              localStorage.setItem('lastEventId', event.lastEventId);
+            }
+            
+            console.log(`${type} 알림 수신:`, notification);
+            this.onNotificationCallback?.(notification);
+          } catch (error) {
+            console.error(`${type} 알림 데이터 파싱 실패:`, error);
+          }
+        });
+      });
+
+      this.eventSource.addEventListener('heartbeat', (event: MessageEvent) => {
         console.log('하트비트 수신:', event.data);
       });
 
@@ -97,7 +131,7 @@ export class NotificationClient {
   }
 
   isConnected(): boolean {
-    return this.eventSource?.readyState === EventSource.OPEN;
+    return this.eventSource?.readyState === EventSourcePolyfill.OPEN;
   }
 
   reconnect() {
