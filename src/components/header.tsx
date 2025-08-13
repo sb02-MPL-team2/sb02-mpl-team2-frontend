@@ -2,26 +2,16 @@
 
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Menu, Bell, User, UserCog, LogOut } from "lucide-react"
-import { NotificationItem } from "./notification-item"
+import { Menu, User, UserCog, LogOut } from "lucide-react"
+import { NotificationPopover } from "./notification-popover"
 import { useAuthStore } from "@/stores/authStore"
 
 interface HeaderProps {
   onMenuClick: () => void
-  notifications: Array<{
-    id: string
-    title: string
-    message: string
-    timestamp: string
-  }>
 }
 
-export function Header({ onMenuClick, notifications }: HeaderProps) {
-  const notificationCount = notifications.length
+export function Header({ onMenuClick }: HeaderProps) {
   const navigate = useNavigate()
   const logout = useAuthStore((state) => state.logout)
 
@@ -43,37 +33,7 @@ export function Header({ onMenuClick, notifications }: HeaderProps) {
 
         {/* Right Side */}
         <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {notificationCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-purple-600 hover:bg-purple-700"
-                  >
-                    {notificationCount > 99 ? "99+" : notificationCount}
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-4 border-b">
-                <h3 className="font-semibold text-gray-900">알림 ({notificationCount})</h3>
-              </div>
-              <ScrollArea className="h-80">
-                <div className="p-1">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <NotificationItem key={notification.id} notification={notification} />
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-gray-500 text-sm">새로운 알림이 없습니다.</div>
-                  )}
-                </div>
-              </ScrollArea>
-            </PopoverContent>
-          </Popover>
+          <NotificationPopover />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">

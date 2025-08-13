@@ -5,3 +5,4 @@ export * from './content';
 export * from './playlist';
 export * from './follow';
 export * from './api';
+export * from './notification';
