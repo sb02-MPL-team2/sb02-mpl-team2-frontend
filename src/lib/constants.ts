@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
   ADMIN_LOCK_USER: (userId: number) => `/admin/users/${userId}/lock`,
   ADMIN_UNLOCK_USER: (userId: number) => `/admin/users/${userId}/unlock`,
   ADMIN_UPDATE_ROLE: (userId: number) => `/admin/users/${userId}/role`,
+  
 } as const;
 
 // Query Keys for TanStack Query
@@ -87,6 +88,7 @@ export const QUERY_KEYS = {
   
   // Admin
   ADMIN_USERS: ['admin', 'users'],
+  
 } as const;
 
 // User Roles

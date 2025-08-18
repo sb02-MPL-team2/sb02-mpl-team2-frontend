@@ -6,3 +6,4 @@ export * from './playlist';
 export * from './follow';
 export * from './api';
 export * from './notification';
+export * from './livewatch';

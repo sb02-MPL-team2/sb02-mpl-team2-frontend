@@ -36,11 +36,11 @@ export default function PlaylistDetailPage({ playlistId }: PlaylistDetailPagePro
     queryFn: () => playlistService.getPlaylistById(parseInt(playlistId))
   })
 
-  // 구독한 플레이리스트 목록 조회는 임시로 비활성화 (백엔드 구현 필요)
+  // 구독한 플레이리스트 목록 조회
   const { data: subscribedPlaylists = [] } = useQuery({
     queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS,
-    queryFn: () => Promise.resolve([]), // 임시로 빈 배열 반환
-    enabled: false // 현재 비활성화
+    queryFn: () => playlistService.getSubscribedPlaylists(),
+    enabled: !!user // 사용자가 로그인된 경우에만 조회
   })
 
   // 플레이리스트 생성자 정보는 playlist.profile에서 가져옴

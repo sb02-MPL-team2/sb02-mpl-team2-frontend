@@ -120,6 +120,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   connect: () => {
+    // 이미 연결되어 있으면 무시
+    if (get().isConnected) {
+      console.log('SSE 이미 연결됨 - 중복 연결 방지');
+      return;
+    }
+    
     // SSE 클라이언트에 콜백 등록
     notificationClient.onNotification((notification) => {
       get().addNotification(notification);

@@ -30,11 +30,11 @@ export default function PlaylistsPage() {
     enabled: subscriptionFilter === "all" || subscriptionFilter === "unsubscribed"
   })
 
-  // 구독한 플레이리스트 조회는 임시로 비활성화 (백엔드 구현 필요)
+  // 구독한 플레이리스트 조회
   const { data: subscribedPlaylists = [], isLoading: isLoadingSubscribed, error: subscribedError } = useQuery({
     queryKey: QUERY_KEYS.SUBSCRIBED_PLAYLISTS,
-    queryFn: () => Promise.resolve([]), // 임시로 빈 배열 반환
-    enabled: false, // 현재 비활성화
+    queryFn: () => playlistService.getSubscribedPlaylists(),
+    enabled: subscriptionFilter === "subscribed", // 구독 필터가 선택된 경우에만 조회
     retry: 1
   })
 

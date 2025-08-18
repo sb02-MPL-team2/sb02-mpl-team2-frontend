@@ -7,7 +7,7 @@ import App from './App'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  // StrictMode 임시 제거 - 개발 중 useEffect 중복 실행 방지
+  // StrictMode 비활성화 - 개발 중 useEffect 중복 실행 방지
   // <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />

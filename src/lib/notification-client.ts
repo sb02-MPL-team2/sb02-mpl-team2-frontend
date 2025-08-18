@@ -11,6 +11,12 @@ export class NotificationClient {
   private reconnectDelay = 1000;
 
   connect() {
+    // 이미 연결 중이면 무시
+    if (this.eventSource?.readyState === EventSourcePolyfill.CONNECTING) {
+      console.log('SSE 이미 연결 중 - 중복 연결 방지');
+      return;
+    }
+    
     if (this.eventSource) {
       this.disconnect();
     }

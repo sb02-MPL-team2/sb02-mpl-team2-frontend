@@ -46,6 +46,7 @@ export default function ChatPage({ userId }: ChatPageProps) {
         timestamp: new Date().toLocaleTimeString("ko-KR", {
           hour: "numeric",
           minute: "2-digit",
+          second: "2-digit",
           hour12: true,
         }),
       }
