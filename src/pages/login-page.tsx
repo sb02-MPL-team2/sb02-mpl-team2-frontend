@@ -14,6 +14,7 @@ import { CheckCircle, AlertCircle } from "lucide-react"
 
 import { useAuthStore } from "@/stores/authStore"
 import SocialLoginButtons from "@/components/social-login-buttons"
+import { ROUTES } from "@/lib/constants"
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -118,10 +119,10 @@ export default function LoginPage() {
 
           {/* Helper Links */}
           <div className="flex flex-col space-y-2 text-sm text-center">
-            <Link to="/404" className="text-gray-600 hover:text-gray-800 hover:underline">
+            <Link to={ROUTES.FORGOT_PASSWORD} className="text-gray-600 hover:text-gray-800 hover:underline">
               비밀번호를 잊어버리셨나요?
             </Link>
-            <Link to="/signup" className="text-purple-600 hover:text-purple-800 hover:underline">
+            <Link to={ROUTES.SIGNUP} className="text-purple-600 hover:text-purple-800 hover:underline">
               계정이 없으신가요? 회원가입
             </Link>
           </div>

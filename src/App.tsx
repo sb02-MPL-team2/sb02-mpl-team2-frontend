@@ -6,6 +6,8 @@ import { useNotificationStore } from '@/stores/notification-store'
 // Import components
 import LoginPage from '@/pages/login-page'
 import SignupPage from '@/pages/signup-page'
+import { ForgotPasswordPage } from '@/pages/forgot-password-page'
+import { ResetPasswordPage } from '@/pages/reset-password-page'
 import NotFoundPage from '@/pages/not-found-page'
 import DashboardPage from '@/pages/dashboard-page'
 import WatchPageWrapper from '@/pages/watch-page-wrapper'
@@ -31,6 +33,14 @@ const router = createBrowserRouter([
   {
     path: "/signup",
     element: <SignupPage />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPasswordPage />,
   },
   {
     path: "/contents",

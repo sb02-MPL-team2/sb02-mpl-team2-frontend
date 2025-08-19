@@ -61,3 +61,13 @@ export interface UserSlimDto {
   username: string;
   profileUrl: string;
 }
+
+// Password Reset types
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}

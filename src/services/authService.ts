@@ -1,6 +1,6 @@
 import apiClient from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { LoginRequest, LoginResponse, RefreshTokenResponse, SignupRequest, SignupResponse } from '@/types';
+import { LoginRequest, LoginResponse, RefreshTokenResponse, SignupRequest, SignupResponse, ForgotPasswordRequest, ResetPasswordRequest } from '@/types';
 
 /**
  * 인증 관련 API 서비스
@@ -58,6 +58,24 @@ export const authService = {
     }
     const response = await apiClient.post<SignupResponse>(API_ENDPOINTS.AUTH_SIGNUP, formData);
     return response.data;
+  },
+
+  /**
+   * 비밀번호 재설정 요청을 처리합니다
+   * @param data 비밀번호 재설정 요청 데이터 (이메일)
+   * @throws API 에러 시 예외 발생
+   */
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
+    await apiClient.post(API_ENDPOINTS.AUTH_FORGOT_PASSWORD, data);
+  },
+
+  /**
+   * 비밀번호를 재설정합니다
+   * @param data 비밀번호 재설정 데이터 (토큰, 새 비밀번호)
+   * @throws API 에러 시 예외 발생
+   */
+  resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+    await apiClient.post(API_ENDPOINTS.AUTH_RESET_PASSWORD, data);
   },
 
   // 토큰 관리 메서드들이 제거됨

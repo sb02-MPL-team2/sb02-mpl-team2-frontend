@@ -7,9 +7,9 @@ export const API_ENDPOINTS = {
   AUTH_LOGIN: '/auth/login',
   AUTH_REFRESH: '/auth/refresh', 
   AUTH_LOGOUT: '/auth/logout',
-  
-  // Auth
   AUTH_SIGNUP: '/auth/signup',
+  AUTH_FORGOT_PASSWORD: '/auth/forgot-password',
+  AUTH_RESET_PASSWORD: '/auth/reset-password',
   
   // Users
   USERS: '/users',
@@ -112,6 +112,8 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   SIGNUP: '/signup',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password',
   CONTENTS: '/contents',
   WATCH: (contentId: number) => `/watch/${contentId}`,
   REVIEW: (contentId: number) => `/review/${contentId}`,
