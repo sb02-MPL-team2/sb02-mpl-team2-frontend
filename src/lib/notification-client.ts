@@ -40,7 +40,11 @@ export class NotificationClient {
         headers['Last-Event-ID'] = lastEventId;
       }
       
-      this.eventSource = new EventSourcePolyfill('http://localhost:8080/sse', {
+      const sseUrl = typeof window !== 'undefined' 
+        ? `${window.location.protocol}//${window.location.host}/sse`
+        : 'http://localhost:8080/sse';
+      
+      this.eventSource = new EventSourcePolyfill(sseUrl, {
         headers,
         withCredentials: true,
         heartbeatTimeout: 60000, // 60초 하트비트

@@ -21,8 +21,12 @@ export class LiveWatchWebSocketClient {
   };
 
   constructor() {
+    const wsUrl = typeof window !== 'undefined' 
+      ? `${window.location.protocol}//${window.location.host}/ws`
+      : 'http://localhost:8080/ws';
+    
     this.client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS(wsUrl),
       
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,  // STOMP 하트비트 (연결 유지)

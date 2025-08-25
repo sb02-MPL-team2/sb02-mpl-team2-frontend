@@ -1,5 +1,8 @@
 // API Constants
-export const API_BASE_URL = 'http://localhost:8080/api';
+// 현재 브라우저의 호스트와 포트를 사용 (빌드된 정적 파일이 백엔드에서 서빙될 때)
+export const API_BASE_URL = typeof window !== 'undefined' 
+  ? `${window.location.protocol}//${window.location.host}/api`
+  : 'http://localhost:8080/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
