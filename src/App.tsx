@@ -19,6 +19,7 @@ import UserProfileDetailPageWrapper from '@/pages/user-profile-detail-page-wrapp
 import ProfileEditPage from '@/pages/profile-edit-page'
 import ChatPageWrapper from '@/pages/chat-page-wrapper'
 import UserManagementPage from '@/pages/user-management-page'
+import OAuth2CallbackPage from '@/pages/oauth2-callback-page'
 import ProtectedRoute from '@/components/protected-route'
 
 const router = createBrowserRouter([
@@ -41,6 +42,14 @@ const router = createBrowserRouter([
   {
     path: "/reset-password",
     element: <ResetPasswordPage />,
+  },
+  {
+    path: "/oauth2/callback/success",
+    element: <OAuth2CallbackPage />,
+  },
+  {
+    path: "/oauth2/callback/error",
+    element: <OAuth2CallbackPage />,
   },
   {
     path: "/contents",

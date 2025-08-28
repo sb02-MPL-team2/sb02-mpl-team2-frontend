@@ -1,8 +1,10 @@
 // API Constants
 // 현재 브라우저의 호스트와 포트를 사용 (빌드된 정적 파일이 백엔드에서 서빙될 때)
-export const API_BASE_URL = typeof window !== 'undefined' 
-  ? `${window.location.protocol}//${window.location.host}/api`
-  : 'http://localhost:8080/api';
+export const BASE_URL = typeof window !== 'undefined' 
+  ? `${window.location.protocol}//${window.location.host}`
+  : 'http://localhost:8080';
+
+export const API_BASE_URL = `${BASE_URL}/api`;
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -53,6 +55,14 @@ export const API_ENDPOINTS = {
   ADMIN_UNLOCK_USER: (userId: number) => `/admin/users/${userId}/unlock`,
   ADMIN_UPDATE_ROLE: (userId: number) => `/admin/users/${userId}/role`,
   
+} as const;
+
+// OAuth2 Endpoints
+export const OAUTH2_ENDPOINTS = {
+  GOOGLE: `${BASE_URL}/oauth2/authorization/google`,
+  KAKAO: `${BASE_URL}/oauth2/authorization/kakao`,
+  CALLBACK_SUCCESS: '/oauth2/callback/success',
+  CALLBACK_ERROR: '/oauth2/callback/error',
 } as const;
 
 // Query Keys for TanStack Query
